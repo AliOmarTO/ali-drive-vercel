@@ -13,6 +13,12 @@ export const env = createEnv({
     DB_LOCAL_PATH: z.string().optional(),
     NODE_ENV: z.enum(['development', 'production']).default('development'),
     CLERK_SECRET_KEY: z.string(),
+    API_TOKEN: z.string().min(1, 'API_TOKEN is required'),
+    ACCESS_KEY_ID: z.string().min(1, 'ACCESS_KEY_ID is required'),
+    SECRET_ACCESS_KEY: z.string().min(1, 'SECRET_ACCESS_KEY is required'),
+    S3_ENDPOINT: z.string().url('S3_ENDPOINT must be a valid URL'),
+    ACCOUNT_ID: z.string().min(1, 'ACCOUNT_ID is required'),
+    BUCKET_NAME: z.string().min(1, 'BUCKET_NAME is required'),
   },
 
   /**
@@ -36,6 +42,12 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    ACCOUNT_ID: process.env.ACCOUNT_ID,
+    ACCESS_KEY_ID: process.env.ACCESS_KEY_ID,
+    SECRET_ACCESS_KEY: process.env.SECRET_ACCESS_KEY,
+    BUCKET_NAME: process.env.BUCKET_NAME,
+    API_TOKEN: process.env.API_TOKEN,
+    S3_ENDPOINT: process.env.S3_ENDPOINT,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
