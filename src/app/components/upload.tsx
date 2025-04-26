@@ -8,6 +8,8 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { IconProps } from '@radix-ui/react-icons/dist/types';
 import Button from './Button';
+import Image from 'next/image';
+import { getUploadPreSignedUrl, uploadFileToUrl } from '@/server/functions/upload';
 
 export function Upload() {
   const [file, setFile] = useState<File | undefined>();
@@ -29,111 +31,35 @@ export function Upload() {
     setMessage('');
   };
 
-  const handleWorkerApiSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (file) {
-      setUploading(true);
-      setMessage('Uploading...');
-      const formData = new FormData();
-      formData.append('file', file);
-
-      try {
-        const res = await fetch(`/api/workers-api/upload?filename=${file.name}`, {
-          method: 'PUT',
-          body: formData,
-        });
-
-        const result = (await res.json()) as { status: string };
-        result.status === 'success'
-          ? setMessage('File Upload Successful')
-          : setMessage('File Upload Failed');
-      } catch (error) {
-        setMessage('An error occured');
-      } finally {
-        setUploading(false);
-      }
-    } else {
-      setMessage('Please select a file');
-    }
-  };
-
   const handlePreSignedUrlSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (file) {
-      setUploading(true);
-      setMessage('Uploading...');
-      try {
-        // Fetch the Pre-Signed URL
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ filename: file.name }),
-        });
-        if (res.ok) {
-          const { url }: { url: string } = await res.json();
-          const uploadRes = await fetch(url, {
-            method: 'PUT',
-            body: file,
-          });
-          console.log(uploadRes);
-          if (uploadRes.ok) {
-            setMessage('File Upload Successful!');
-          } else {
-            setMessage('File Upload Failed');
-          }
-        } else {
-          setMessage('Pre-Sign URL error');
-        }
-      } catch (error) {
-        console.error(error);
-        setMessage('An error occured');
-      } finally {
-        setUploading(false);
-      }
-    } else {
-      setMessage('Please select a file');
-    }
-  };
 
-  const handleTempCredsSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (file) {
-      setUploading(true);
-      setMessage('Uploading...');
-      try {
-        // Fetch the Pre-Signed URL
-        const res = await fetch('/api/temp-creds', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ filename: file.name }),
-        });
-        if (res.ok) {
-          const { url }: { url: string } = await res.json();
-          const uploadRes = await fetch(url, {
-            method: 'PUT',
-            body: file,
-          });
-          console.log(uploadRes);
-          if (uploadRes.ok) {
-            setMessage('File Upload Successful!');
-          } else {
-            setMessage('File Upload Failed');
-          }
-        } else {
-          setMessage('Pre-Sign URL error');
-        }
-      } catch (error) {
-        console.error(error);
-        setMessage('An error occured');
-      } finally {
-        setUploading(false);
-      }
-    } else {
+    if (!file) {
       setMessage('Please select a file');
+      return;
+    }
+
+    setUploading(true);
+    setMessage('Uploading...');
+
+    try {
+      // Fetch the upload Pre-Signed URL
+      const url = await getUploadPreSignedUrl(file.name);
+
+      if (!url) {
+        setMessage('Pre-Sign URL error');
+        return;
+      }
+
+      // Upload the file to the bucket using the Pre-Signed URL
+      const success = await uploadFileToUrl(url, file);
+
+      setMessage(success ? 'File Upload Successful!' : 'File Upload Failed');
+    } catch (error) {
+      console.error(error);
+      setMessage('An error occured');
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -163,7 +89,7 @@ export function Upload() {
 
               {preview && (
                 <div className="bg-white dark:bg-gray-800 shadow-md mt-4 mb-4">
-                  <img
+                  <Image
                     src={preview}
                     alt="Uploaded Image"
                     width={600}
@@ -174,10 +100,8 @@ export function Upload() {
               )}
               <p className="dark:text-gray-200">Upload with</p>
               <p className="text-sm dark:text-gray-500">select one</p>
-              <div className="flex justify-between">
-                <Button text="Workers API" submitHandler={handleWorkerApiSubmit} />
-                <Button text="Pre-signed URL" submitHandler={handlePreSignedUrlSubmit} />
-                <Button text="Temp Credentials" submitHandler={handleTempCredsSubmit} />
+              <div className="flex justify-end">
+                <Button text="Submit" submitHandler={handlePreSignedUrlSubmit} />
               </div>
             </form>
             <div className="mt-2">
