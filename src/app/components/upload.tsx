@@ -9,13 +9,15 @@ import { ChangeEvent, FormEvent, useState } from 'react';
 import { IconProps } from '@radix-ui/react-icons/dist/types';
 import Button from './Button';
 import Image from 'next/image';
-import { getUploadPreSignedUrl, uploadFileToUrl } from '@/server/functions/upload';
+import { getUploadPreSignedUrl, uploadFileToUrl, uploadMetadata } from '@/server/functions/upload';
+import { useAuth } from '@clerk/nextjs';
 
 export function Upload() {
   const [file, setFile] = useState<File | undefined>();
   const [uploading, setUploading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [preview, setPreview] = useState<string | null>(null);
+  const { userId } = useAuth();
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -43,7 +45,7 @@ export function Upload() {
     setMessage('Uploading...');
 
     try {
-      // Fetch the upload Pre-Signed URL
+      // Step 1 Fetch the upload Pre-Signed URL
       const url = await getUploadPreSignedUrl(file.name);
 
       if (!url) {
@@ -51,10 +53,27 @@ export function Upload() {
         return;
       }
 
-      // Upload the file to the bucket using the Pre-Signed URL
+      // Step 2 Upload the file to the bucket using the Pre-Signed URL
       const success = await uploadFileToUrl(url, file);
 
       setMessage(success ? 'File Upload Successful!' : 'File Upload Failed');
+
+      //path to the file in the bucket
+      const storagePath = `${userId}/${file.name}`;
+
+      // Step 3 Upload metadata to the database
+      const metadataSuccess = await uploadMetadata(
+        file.name,
+        file.size,
+        file.type,
+        userId!,
+        storagePath
+      );
+      if (!metadataSuccess) {
+        setMessage('Metadata upload failed');
+      } else {
+        setMessage('Metadata upload successful');
+      }
     } catch (error) {
       console.error(error);
       setMessage('An error occured');

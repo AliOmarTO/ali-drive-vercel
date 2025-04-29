@@ -1,9 +1,10 @@
 import type { NextRequest } from 'next/server';
-// import S3 from "@/lib/r2";
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { S3Client } from '@aws-sdk/client-s3';
 import { env } from '@/env';
+import { auth } from '@clerk/nextjs/server';
+import { createSupabaseClient } from '../../../../utils/supabase/client';
 
 const ACCOUNT_ID = env.ACCOUNT_ID as string;
 const ACCESS_KEY_ID = env.ACCESS_KEY_ID as string;
@@ -22,13 +23,22 @@ const S3 = new S3Client({
 // Get Pre-Signed URL for Upload
 export async function POST(request: NextRequest) {
   const { filename }: { filename: string } = await request.json();
+  const { userId } = await auth(); // Get Clerk userId
+
+  if (!userId) {
+    return new Response('Unauthorized', { status: 401 });
+  }
+
+  const prefixedFilename = `${userId}/${filename}`;
+
+  console.log('Generating pre-signed URL for:', prefixedFilename);
 
   try {
     const url = await getSignedUrl(
       S3,
       new PutObjectCommand({
         Bucket: BUCKET_NAME,
-        Key: filename,
+        Key: prefixedFilename,
       }),
       {
         expiresIn: 600,
