@@ -31,7 +31,8 @@ export async function POST(request: NextRequest) {
     ]);
 
     if (error) {
-      throw new Error(error.message);
+      console.error('Supabase insert error:', error.message);
+      return new Response('Database error: ' + error.message, { status: 500 });
     }
 
     console.log('uplaoded Data:', data);

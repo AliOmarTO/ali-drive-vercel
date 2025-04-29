@@ -12,6 +12,8 @@ import Image from 'next/image';
 import { getUploadPreSignedUrl, uploadFileToUrl, uploadMetadata } from '@/server/functions/upload';
 import { useAuth } from '@clerk/nextjs';
 
+const MAX_SIZE_MB = 5;
+
 export function Upload() {
   const [file, setFile] = useState<File | undefined>();
   const [uploading, setUploading] = useState<boolean>(false);
@@ -41,12 +43,24 @@ export function Upload() {
       return;
     }
 
+    // only images are allowed
+    if (!file.type.startsWith('image/')) {
+      setMessage('Only image files are allowed.');
+      return;
+    }
+
+    // only 5mb limit upload allowed
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      setMessage(`File too large. Max size is ${MAX_SIZE_MB}MB.`);
+      return;
+    }
+
     setUploading(true);
     setMessage('Uploading...');
 
     try {
       // Step 1 Fetch the upload Pre-Signed URL
-      const url = await getUploadPreSignedUrl(file.name);
+      const url = await getUploadPreSignedUrl(file.name, file.size, file.type);
 
       if (!url) {
         setMessage('Pre-Sign URL error');

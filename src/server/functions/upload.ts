@@ -1,12 +1,16 @@
 // Generates a pre-signed URL for uploading files to Cloudflare R2 bucket
-export const getUploadPreSignedUrl = async (filename: string): Promise<string | null> => {
+export const getUploadPreSignedUrl = async (
+  filename: string,
+  size: number,
+  type: string
+): Promise<string | null> => {
   try {
     const res = await fetch('/api/upload', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ filename }),
+      body: JSON.stringify({ filename, size, type }),
     });
 
     if (!res.ok) {

@@ -11,6 +11,9 @@ const ACCESS_KEY_ID = env.ACCESS_KEY_ID as string;
 const SECRET_ACCESS_KEY = env.SECRET_ACCESS_KEY as string;
 const BUCKET_NAME = env.BUCKET_NAME as string;
 
+// max upload limit is 5mb
+const MAX_SIZE_BYTES = 5 * 1024 * 1024;
+
 const S3 = new S3Client({
   region: 'auto',
   endpoint: `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -22,15 +25,26 @@ const S3 = new S3Client({
 
 // Get Pre-Signed URL for Upload
 export async function POST(request: NextRequest) {
-  const { filename }: { filename: string } = await request.json();
+  const { filename, size, type }: { filename: string; size: number; type: string } =
+    await request.json();
   const { userId } = await auth(); // Get Clerk userId
 
+  // if unauthroizered dont create a presigned url
   if (!userId) {
     return new Response('Unauthorized', { status: 401 });
   }
 
-  const prefixedFilename = `${userId}/${filename}`;
+  // if over the upload limit dont create a presigned url
+  if (size > MAX_SIZE_BYTES) {
+    return new Response('File too large', { status: 413 });
+  }
 
+  // if not a image file dont create a presigned url
+  if (!['image/png', 'image/jpeg', 'image/webp, image/avif'].includes(type)) {
+    return new Response('Unsupported file type', { status: 400 });
+  }
+
+  const prefixedFilename = `${userId}/${filename}`;
   console.log('Generating pre-signed URL for:', prefixedFilename);
 
   try {
