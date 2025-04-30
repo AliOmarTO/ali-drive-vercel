@@ -70,27 +70,17 @@ export function Upload() {
       // Step 2 Upload the file to the bucket using the Pre-Signed URL
       const success = await uploadFileToUrl(url, file);
 
-      setMessage(success ? 'File Upload Successful!' : 'File Upload Failed');
-
       //path to the file in the bucket
       const storagePath = `${userId}/${file.name}`;
 
       // Step 3 Upload metadata to the database
-      const metadataSuccess = await uploadMetadata(
-        file.name,
-        file.size,
-        file.type,
-        userId!,
-        storagePath
-      );
-      if (!metadataSuccess) {
-        setMessage('Metadata upload failed');
-      } else {
-        setMessage('Metadata upload successful');
-      }
+      await uploadMetadata(file.name, file.size, file.type, userId!, storagePath);
+
+      setMessage(success ? 'File Upload Successful!' : 'File Upload Failed');
     } catch (error) {
       console.error(error);
-      setMessage('An error occured');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setMessage('An error occured: ' + errorMessage);
     } finally {
       setUploading(false);
     }

@@ -4,7 +4,8 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { S3Client } from '@aws-sdk/client-s3';
 import { env } from '@/env';
 import { auth } from '@clerk/nextjs/server';
-import { createSupabaseClient } from '../../../../utils/supabase/client';
+import { v4 } from 'uuid';
+
 
 const ACCOUNT_ID = env.ACCOUNT_ID as string;
 const ACCESS_KEY_ID = env.ACCESS_KEY_ID as string;
@@ -28,11 +29,6 @@ export async function POST(request: NextRequest) {
   const { filename, size, type }: { filename: string; size: number; type: string } =
     await request.json();
   const { userId } = await auth(); // Get Clerk userId
-
-  // if unauthroizered dont create a presigned url
-  if (!userId) {
-    return new Response('Unauthorized', { status: 401 });
-  }
 
   // if over the upload limit dont create a presigned url
   if (size > MAX_SIZE_BYTES) {
@@ -59,7 +55,10 @@ export async function POST(request: NextRequest) {
       }
     );
     return Response.json({ url });
-  } catch (error: any) {
-    return Response.json({ error: error.message });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return Response.json({ error: error.message });
+    }
+    return Response.json({ error: 'An unknown error occurred' });
   }
 }

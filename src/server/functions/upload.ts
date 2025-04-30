@@ -14,15 +14,23 @@ export const getUploadPreSignedUrl = async (
     });
 
     if (!res.ok) {
-      console.error('Failed to fetch pre-signed URL');
-      return null;
+      const errorData = await res.json(); // This assumes the server sends a JSON body with error details
+      const errorMessage = errorData?.error || 'Failed to fetch pre-signed URL';
+      console.error('Failed to fetch pre-signed URL', errorMessage);
+      throw new Error('Failed to fetch pre-signed URL: ' + errorMessage);
     }
 
     const { url }: { url: string } = await res.json();
+
+    if (!url) {
+      console.error('Missing pre-signed URL in response');
+      throw new Error('Missing pre-signed URL in response');
+    }
+
     return url;
   } catch (error) {
     console.error('Error fetching pre-signed URL:', error);
-    return null;
+    throw new Error('Error fetching pre-signed URL:' + error);
   }
 };
 
@@ -37,7 +45,7 @@ export const uploadFileToUrl = async (url: string, file: File): Promise<boolean>
     return uploadRes.ok;
   } catch (error) {
     console.error('Error uploading file:', error);
-    return false;
+    throw new Error('Error uploading file:' + error);
   }
 };
 
@@ -60,15 +68,23 @@ export const uploadMetadata = async (
     });
 
     if (!res.ok) {
-      console.error('Failed to upload metadata');
-      return false;
+      // Handle different HTTP status codes (e.g., 409 Conflict)
+      const errorMessage = (await res.text()) || 'Failed to fetch pre-signed URL';
+
+      if (res.status === 409) {
+        console.warn('Image already exists:', errorMessage);
+      } else {
+        console.error('Error fetching pre-signed URL:', errorMessage);
+      }
+
+      throw new Error(errorMessage); // Throw the error to handle in the calling function
     }
 
     const data = await res.json();
-    console.log('Metadata uploaded successfully:', data);
-    return true;
+    console.log('Metadata uploaded successfully');
+    return data;
   } catch (error) {
     console.error('Error uploading metadata:', error);
-    return false;
+    throw new Error('Error uploading metadata:' + error);
   }
 };
