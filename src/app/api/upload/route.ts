@@ -22,6 +22,20 @@ const S3 = new S3Client({
   },
 });
 
+const generatePreSignedUrl = async (fileName: string) => {
+  const url = await getSignedUrl(
+    S3,
+    new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: fileName,
+    }),
+    {
+      expiresIn: 600,
+    }
+  );
+  return url;
+};
+
 // Get Pre-Signed URL for Upload
 export async function POST(request: NextRequest) {
   const { filename, size, type }: { filename: string; size: number; type: string } =
@@ -38,20 +52,15 @@ export async function POST(request: NextRequest) {
     return new Response('Unsupported file type', { status: 400 });
   }
 
-  const prefixedFilename = `${userId}/${filename}`;
+  const prefixedOGFilename = `${userId}/${filename}`;
+  const thumbnailPath = `${userId}/thumbnails/thumb-${filename}`;
 
   try {
-    const url = await getSignedUrl(
-      S3,
-      new PutObjectCommand({
-        Bucket: BUCKET_NAME,
-        Key: prefixedFilename,
-      }),
-      {
-        expiresIn: 600,
-      }
-    );
-    return Response.json({ url });
+    // Generate the pre-signed URL for uploading the file
+    const originalUrl = await generatePreSignedUrl(prefixedOGFilename);
+    const thumbnailUrl = await generatePreSignedUrl(thumbnailPath);
+
+    return Response.json({ originalUrl, thumbnailUrl });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return Response.json({ error: error.message });

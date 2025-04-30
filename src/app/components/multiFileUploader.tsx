@@ -1,6 +1,10 @@
 'use client';
 
-import { getUploadPreSignedUrl, uploadMetadata } from '@/server/functions/upload';
+import {
+  generateThumbnail,
+  getUploadPreSignedUrl,
+  uploadMetadata,
+} from '@/server/functions/upload';
 import { useState } from 'react';
 
 type FileUploadStatus = {
@@ -33,13 +37,19 @@ export default function MultiFileUploader({ userId }: { userId: string }) {
       fileArray.map(async (item, index) => {
         try {
           // Step 1 Fetch the upload Pre-Signed URL
-          const url = await getUploadPreSignedUrl(item.file.name, item.file.size, item.file.type);
+          const { originalUrl, thumbnailUrl } = await getUploadPreSignedUrl(
+            item.file.name,
+            item.file.size,
+            item.file.type
+          );
 
           // 2. Upload to R2 with progress tracking
-          if (!url) {
+          if (!originalUrl || !thumbnailUrl) {
             throw new Error('Failed to fetch upload pre-signed URL');
           }
-          await uploadFileWithProgress(url, item.file, (progress) => {
+
+          // uplaod the original file first
+          await uploadFileWithProgress(originalUrl, item.file, (progress) => {
             setUploads((prev) => {
               const updated = [...prev];
               updated[index].progress = progress;
@@ -47,8 +57,15 @@ export default function MultiFileUploader({ userId }: { userId: string }) {
             });
           });
 
+          // upload the thumbnail file
+          const thumbnailFile = await generateThumbnail(item.file);
+          await uploadFileWithProgress(thumbnailUrl, thumbnailFile, (progress) => {
+            console.log('Thumbnail upload progress:', progress);
+          });
+
           //path to the file in the bucket
           const storagePath = `${userId}/${item.file.name}`;
+          const thumbnailPath = `${userId}/thumbnails/thumb-${item.file.name}`;
 
           // Step 3 Upload metadata to the database
           await uploadMetadata(
@@ -56,7 +73,8 @@ export default function MultiFileUploader({ userId }: { userId: string }) {
             item.file.size,
             item.file.type,
             userId!,
-            storagePath
+            storagePath,
+            thumbnailPath
           );
 
           setUploads((prev) => {

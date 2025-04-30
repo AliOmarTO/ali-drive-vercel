@@ -21,7 +21,7 @@ const S3 = new S3Client({
 
 // Get Pre-Signed URL for Download
 export async function GET(request: NextRequest) {
-  const storagePath = request.nextUrl.searchParams.get('storage_path') as string;
+  const storagePath = request.nextUrl.searchParams.get('path') as string;
   try {
     const url = await getSignedUrl(
       S3,

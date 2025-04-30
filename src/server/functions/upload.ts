@@ -1,9 +1,55 @@
+export const generateThumbnail = (file: File, maxWidth: number = 50): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      img.src = reader.result as string;
+    };
+
+    reader.onerror = (err) => reject(err);
+    reader.readAsDataURL(file);
+
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        reject('Could not get canvas context');
+        return;
+      }
+
+      // Calculate the aspect ratio
+      const aspectRatio = img.height / img.width;
+      const width = maxWidth;
+      const height = maxWidth * aspectRatio;
+
+      // Set canvas size to the thumbnail size
+      canvas.width = width;
+      canvas.height = height;
+
+      // Draw the image onto the canvas
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Convert the canvas content into a Blob
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const thumbnailFile = new File([blob], `${file.name}_thumbnail`, { type: 'image/jpeg' });
+          resolve(thumbnailFile);
+        } else {
+          reject('Failed to generate thumbnail');
+        }
+      }, 'image/jpeg');
+    };
+  });
+};
+
 // Generates a pre-signed URL for uploading files to Cloudflare R2 bucket
 export const getUploadPreSignedUrl = async (
   filename: string,
   size: number,
   type: string
-): Promise<string | null> => {
+): Promise<{ originalUrl: string | null; thumbnailUrl: string | null }> => {
   try {
     const res = await fetch('/api/upload', {
       method: 'POST',
@@ -20,14 +66,15 @@ export const getUploadPreSignedUrl = async (
       throw new Error('Failed to fetch pre-signed URL: ' + errorMessage);
     }
 
-    const { url }: { url: string } = await res.json();
+    const { originalUrl, thumbnailUrl }: { originalUrl: string; thumbnailUrl: string } =
+      await res.json();
 
-    if (!url) {
+    if (!originalUrl || !thumbnailUrl) {
       console.error('Missing pre-signed URL in response');
       throw new Error('Missing pre-signed URL in response');
     }
 
-    return url;
+    return { originalUrl, thumbnailUrl };
   } catch (error) {
     console.error('Error fetching pre-signed URL:', error);
     throw new Error('Error fetching pre-signed URL:' + error);
@@ -55,7 +102,8 @@ export const uploadMetadata = async (
   size: number,
   type: string,
   userId: string,
-  storagePath: string
+  storagePath: string,
+  thumbnailPath: string
 ): Promise<boolean> => {
   try {
     const res = await fetch('/api/upload-metadata', {
@@ -64,7 +112,7 @@ export const uploadMetadata = async (
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ filename, size, type, userId, storagePath }),
+      body: JSON.stringify({ filename, size, type, userId, storagePath, thumbnailPath }),
     });
 
     if (!res.ok) {

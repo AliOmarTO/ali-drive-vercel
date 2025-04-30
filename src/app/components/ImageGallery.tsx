@@ -8,6 +8,7 @@ interface ImageMetadata {
   filename: string;
   storage_path: string;
   type: string;
+  thumbnail_path: string;
 }
 
 export default function ImageGallery() {
@@ -48,7 +49,7 @@ export default function ImageGallery() {
     const fetchPreSignedUrls = async () => {
       const urls = await Promise.all(
         images.map(async (image) => {
-          const res = await fetch(`/api/download?storage_path=${image.storage_path}`);
+          const res = await fetch(`/api/download?path=${image.thumbnail_path}`);
           const data = await res.json();
           return {
             ...image, // Include image metadata
@@ -85,7 +86,7 @@ export default function ImageGallery() {
           <div key={img.id} className="border rounded shadow-sm">
             <img
               src={img.presignedUrl}
-              alt={img.storage_path}
+              alt={img.thumbnail_path}
               width={300}
               height={300}
               className="object-cover w-full h-48"

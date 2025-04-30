@@ -10,7 +10,8 @@ export async function POST(request: NextRequest) {
     type,
     userId,
     storagePath,
-  }: { filename: string; size: number; type: string; userId: string; storagePath: string } =
+    thumbnailPath,
+  }: { filename: string; size: number; type: string; userId: string; storagePath: string , thumbnailPath: string} =
     await request.json();
 
   try {
@@ -40,6 +41,7 @@ export async function POST(request: NextRequest) {
         size,
         mime_type: type,
         storage_path: storagePath,
+        thumbnail_path: thumbnailPath,  
       },
     ]);
 
