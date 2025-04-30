@@ -1,24 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-// import S3 from "@/lib/r2";
-
-import { S3Client } from '@aws-sdk/client-s3';
-import { env } from '@/env';
 import { createSupabaseClient } from '../../../../utils/supabase/client';
 import { auth } from '@clerk/nextjs/server';
-
-const ACCOUNT_ID = env.ACCOUNT_ID as string;
-const ACCESS_KEY_ID = env.ACCESS_KEY_ID as string;
-const SECRET_ACCESS_KEY = env.SECRET_ACCESS_KEY as string;
-const BUCKET_NAME = env.BUCKET_NAME as string;
-
-const S3 = new S3Client({
-  region: 'auto',
-  endpoint: `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: ACCESS_KEY_ID,
-    secretAccessKey: SECRET_ACCESS_KEY,
-  },
-});
 
 // Get metadata for the images
 export async function GET(request: NextRequest) {

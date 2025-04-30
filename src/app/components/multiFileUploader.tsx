@@ -36,6 +36,9 @@ export default function MultiFileUploader({ userId }: { userId: string }) {
           const url = await getUploadPreSignedUrl(item.file.name, item.file.size, item.file.type);
 
           // 2. Upload to R2 with progress tracking
+          if (!url) {
+            throw new Error('Failed to fetch upload pre-signed URL');
+          }
           await uploadFileWithProgress(url, item.file, (progress) => {
             setUploads((prev) => {
               const updated = [...prev];
@@ -61,10 +64,10 @@ export default function MultiFileUploader({ userId }: { userId: string }) {
             updated[index].done = true;
             return updated;
           });
-        } catch (err: any) {
+        } catch (err: unknown) {
           setUploads((prev) => {
             const updated = [...prev];
-            updated[index].error = err.message;
+            updated[index].error = err instanceof Error ? err.message : 'Unknown error';
             return updated;
           });
         }

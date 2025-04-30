@@ -5,7 +5,7 @@ import { createSupabaseClient } from '../../../utils/supabase/client';
 export const fetchImagesPathForUser = async (
   userId: string,
   page: number = 1
-): Promise<{ images: any[]; totalCount: number }> => {
+): Promise<{ images: { user_id: string; filename: string; storage_path: string; mime_type: string }[]; totalCount: number }> => {
   const PAGE_SIZE = 10;
   const supabase = createSupabaseClient();
 

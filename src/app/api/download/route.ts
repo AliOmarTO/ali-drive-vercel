@@ -34,7 +34,10 @@ export async function GET(request: NextRequest) {
       }
     );
     return Response.json({ url });
-  } catch (error: any) {
-    return Response.json({ error: error.message });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return Response.json({ error: error.message });
+    }
+    return Response.json({ error: 'An unknown error occurred' });
   }
 }

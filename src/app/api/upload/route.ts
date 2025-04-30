@@ -2,10 +2,8 @@ import type { NextRequest } from 'next/server';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { S3Client } from '@aws-sdk/client-s3';
-
 import { env } from '@/env';
 import { auth } from '@clerk/nextjs/server';
-import { v4 } from 'uuid';
 
 const ACCOUNT_ID = env.ACCOUNT_ID as string;
 const ACCESS_KEY_ID = env.ACCESS_KEY_ID as string;

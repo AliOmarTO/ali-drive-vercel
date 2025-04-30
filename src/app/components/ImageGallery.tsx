@@ -1,20 +1,18 @@
 'use client';
 
-import { getDownloadUrl } from '@/server/functions/download';
-import { fetchImagesPathForUser } from '@/server/functions/user';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 interface ImageMetadata {
+  id: string;
   userId: string;
   filename: string;
-  storagePath: string;
+  storage_path: string;
   type: string;
 }
 
-export default function ImageGallery({ userId }: { userId: string }) {
-  const [images, setImages] = useState<any[]>([]); // Store image data
-  const [imageUrls, setImageUrls] = useState<any[]>([]); // Stores pre-signed URLs for images
+export default function ImageGallery() {
+  const [images, setImages] = useState<ImageMetadata[]>([]); // Store image data
+  const [imageUrls, setImageUrls] = useState<(ImageMetadata & { presignedUrl: string })[]>([]); // Stores pre-signed URLs for images
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(1); // Pagination state
@@ -34,6 +32,7 @@ export default function ImageGallery({ userId }: { userId: string }) {
         setTotalPages(data.totalPages); // Set total count of images
       } catch (error) {
         console.error('Error fetching images metadata:', error);
+        setError('Failed to fetch images metadata');
       } finally {
         setLoading(false);
       }
@@ -86,13 +85,13 @@ export default function ImageGallery({ userId }: { userId: string }) {
           <div key={img.id} className="border rounded shadow-sm">
             <img
               src={img.presignedUrl}
-              alt={img.storagePath}
+              alt={img.storage_path}
               width={300}
               height={300}
               className="object-cover w-full h-48"
             />
 
-            <p className="text-xs truncate p-2">{img.storagePath}</p>
+            <p className="text-xs truncate p-2">{img.storage_path}</p>
           </div>
         ))}
       </div>
