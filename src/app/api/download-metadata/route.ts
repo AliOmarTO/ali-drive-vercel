@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 // import S3 from "@/lib/r2";
-import { GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
 import { S3Client } from '@aws-sdk/client-s3';
 import { env } from '@/env';
 import { createSupabaseClient } from '../../../../utils/supabase/client';
@@ -29,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Pagination params
     const page = request.nextUrl.searchParams.get('page') || '1'; // Default to page 1 if not provided
-    const pageSize = 3; // Number of images per page
+    const pageSize = 10; // Number of images per page
     const offset = (Number(page) - 1) * pageSize;
 
     // Fetch image records for the current user with pagination

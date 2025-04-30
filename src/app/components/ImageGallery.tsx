@@ -12,9 +12,9 @@ interface ImageMetadata {
   type: string;
 }
 
-
 export default function ImageGallery({ userId }: { userId: string }) {
   const [images, setImages] = useState<any[]>([]); // Store image data
+  const [imageUrls, setImageUrls] = useState<any[]>([]); // Stores pre-signed URLs for images
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState<number>(1); // Pagination state
@@ -31,7 +31,6 @@ export default function ImageGallery({ userId }: { userId: string }) {
         }
         const data = await res.json();
         setImages(data.images);
-        console.log('Fetched images:', data);
         setTotalPages(data.totalPages); // Set total count of images
       } catch (error) {
         console.error('Error fetching images metadata:', error);
@@ -44,6 +43,27 @@ export default function ImageGallery({ userId }: { userId: string }) {
 
     fetchImages();
   }, [page]);
+
+  useEffect(() => {
+    // fucntion to get presigned URL for each image
+    const fetchPreSignedUrls = async () => {
+      const urls = await Promise.all(
+        images.map(async (image) => {
+          const res = await fetch(`/api/download?storage_path=${image.storage_path}`);
+          const data = await res.json();
+          return {
+            ...image, // Include image metadata
+            presignedUrl: data.url, // add presigned url to image metadata
+          };
+        })
+      );
+      setImageUrls(urls); // Set the pre-signed URLs for images
+      console.log('Fetched pewpew:', urls);
+    };
+    if (images.length > 0) {
+      fetchPreSignedUrls(); // Fetch pre-signed URLs when images are available
+    }
+  }, [images]);
 
   const handleNextPage = () => {
     if (page < totalPages) {
@@ -63,15 +83,15 @@ export default function ImageGallery({ userId }: { userId: string }) {
   return (
     <div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4">
-        {images.map((img) => (
+        {imageUrls.map((img) => (
           <div key={img.id} className="border rounded shadow-sm">
-            {/* <img
-              src={img.url}
+            <img
+              src={img.presignedUrl}
               alt={img.storagePath}
               width={300}
               height={300}
               className="object-cover w-full h-48"
-            /> */}
+            />
 
             <p className="text-xs truncate p-2">{img.storagePath}</p>
           </div>
