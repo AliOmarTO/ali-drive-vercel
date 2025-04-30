@@ -7,7 +7,6 @@ import { env } from '@/env';
 import { auth } from '@clerk/nextjs/server';
 import { v4 } from 'uuid';
 
-
 const ACCOUNT_ID = env.ACCOUNT_ID as string;
 const ACCESS_KEY_ID = env.ACCESS_KEY_ID as string;
 const SECRET_ACCESS_KEY = env.SECRET_ACCESS_KEY as string;
@@ -42,7 +41,6 @@ export async function POST(request: NextRequest) {
   }
 
   const prefixedFilename = `${userId}/${filename}`;
-  console.log('Generating pre-signed URL for:', prefixedFilename);
 
   try {
     const url = await getSignedUrl(

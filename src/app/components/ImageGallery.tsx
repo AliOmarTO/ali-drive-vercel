@@ -58,7 +58,6 @@ export default function ImageGallery({ userId }: { userId: string }) {
         })
       );
       setImageUrls(urls); // Set the pre-signed URLs for images
-      console.log('Fetched pewpew:', urls);
     };
     if (images.length > 0) {
       fetchPreSignedUrls(); // Fetch pre-signed URLs when images are available

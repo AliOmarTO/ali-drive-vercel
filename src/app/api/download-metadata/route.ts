@@ -53,25 +53,6 @@ export async function GET(request: NextRequest) {
 
     // Return the paginated data and pagination info
     return NextResponse.json({ images, totalPages, currentPage: Number(page) });
-
-    // // Generate pre-signed URLs for each storage path in parallel using Promise.all
-    // const preSignedUrls = await Promise.all(
-    //   images.map(async (image) => {
-    //     const url = await getSignedUrl(
-    //       S3,
-    //       new GetObjectCommand({
-    //         Bucket: BUCKET_NAME,
-    //         Key: image.storage_path,
-    //       }),
-    //       {
-    //         expiresIn: 3600, // URL expiration time (in seconds)
-    //       }
-    //     );
-    //     return { storagePath: image.storage_path, url };
-    //   })
-    // );
-
-    // return Response.json(preSignedUrls); // Return the pre-signed URLs
   } catch (error: unknown) {
     if (error instanceof Error) {
       console.error('Error generating pre-signed URLs:', error);
