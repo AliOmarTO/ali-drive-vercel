@@ -6,7 +6,7 @@
 
 'use client';
 import { ChangeEvent, FormEvent, useState } from 'react';
-import { IconProps } from '@radix-ui/react-icons/dist/types';
+// import { IconProps } from '@radix-ui/react-icons/dist/types';
 import Button from './Button';
 import Image from 'next/image';
 import { getUploadPreSignedUrl, uploadFileToUrl, uploadMetadata } from '@/server/functions/upload';
@@ -16,7 +16,6 @@ const MAX_SIZE_MB = 5;
 
 export function Upload() {
   const [file, setFile] = useState<File | undefined>();
-  const [uploading, setUploading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
   const [preview, setPreview] = useState<string | null>(null);
   const { userId } = useAuth();
@@ -55,7 +54,6 @@ export function Upload() {
       return;
     }
 
-    setUploading(true);
     setMessage('Uploading...');
 
     try {
@@ -81,8 +79,6 @@ export function Upload() {
       console.error(error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       setMessage('An error occured: ' + errorMessage);
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -137,7 +133,7 @@ export function Upload() {
   );
 }
 
-function UploadIcon(props: IconProps) {
+function UploadIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
