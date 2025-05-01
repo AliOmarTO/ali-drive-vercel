@@ -1,7 +1,7 @@
 'use client';
 
-import FileManagementUI from './components/FileManagementUi';
-import ImageGallery from './components/DEPRECATED/ImageGallery';
+import FileManagementUI from './components/DEPRECATED/FileManagementUi';
+import { ImageGallery } from './components/ImageGallery';
 import MultiFileUploader from './components/DEPRECATED/multiFileUploader';
 
 export default function Home() {
@@ -10,6 +10,6 @@ export default function Home() {
     //   <MultiFileUploader userId={userId} />
     //   <ImageGallery />
     // </main>
-    <FileManagementUI />
+    <ImageGallery />
   );
 }

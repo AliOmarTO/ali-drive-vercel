@@ -10,19 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Plus, ChevronDown, FolderIcon, Upload, ImageIcon, Star, Trash2 } from 'lucide-react';
 
-export default function Sidebar({
-  handleUpload,
-  setShowNewFolderDialog,
-  arraysEqual,
-  currentPath,
-  navigateToFolder,
-}: {
-  handleUpload: () => void;
-  setShowNewFolderDialog: (value: boolean) => void;
-  arraysEqual: (a: any[], b: any[]) => boolean;
-  currentPath: string[];
-  navigateToFolder: (path: string[]) => void;
-}) {
+export default function Sidebar({ handleUpload }: { handleUpload: () => void }) {
   return (
     <div className="hidden w-64 flex-shrink-0 border-r bg-background p-4 md:block">
       <div className="mb-8 space-y-2">
@@ -40,10 +28,6 @@ export default function Sidebar({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setShowNewFolderDialog(true)}>
-              <FolderIcon className="mr-2 h-4 w-4" />
-              New Folder
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleUpload}>
               <Upload className="mr-2 h-4 w-4" />
               Upload Images
@@ -53,11 +37,7 @@ export default function Sidebar({
       </div>
 
       <nav className="space-y-1">
-        <Button
-          variant={arraysEqual(currentPath, ['My Images']) ? 'secondary' : 'ghost'}
-          className="w-full justify-start gap-2 pl-3"
-          onClick={() => navigateToFolder(['My Images'])}
-        >
+        <Button className="w-full justify-start gap-2 pl-3">
           <ImageIcon className="h-4 w-4" />
           My Images
         </Button>

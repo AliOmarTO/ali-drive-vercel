@@ -24,8 +24,8 @@ import {
   Download,
 } from 'lucide-react';
 import React from 'react';
-import { ImagePreviewModal } from './ImagePreviewModal';
-import Sidebar from './Sidebar';
+import { ImagePreviewModal } from '../ImagePreviewModal';
+import Sidebar from '../Sidebar';
 
 // Update the mock data to only include image files
 const mockData = {
@@ -179,7 +179,6 @@ export default function FileManagementUI() {
         setImages(metadataData.images);
         setTotalPages(metadataData.totalPages); // Set the total pages from metadata
 
-        
         // Step 2: Fetch pre-signed URLs for each image
         const urls = await Promise.all(
           metadataData.images.map(async (image: ImageMetadata) => {
