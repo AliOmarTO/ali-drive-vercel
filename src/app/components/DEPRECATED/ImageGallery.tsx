@@ -92,7 +92,7 @@ export default function ImageGallery() {
               className="object-cover w-full h-48"
             />
 
-            <p className="text-xs truncate p-2">{img.storage_path}</p>
+            <p className="text-xs truncate p-2">{img.filename}</p>
           </div>
         ))}
       </div>

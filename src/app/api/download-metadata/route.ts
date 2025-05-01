@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseClient } from '../../../../utils/supabase/client';
 import { auth } from '@clerk/nextjs/server';
 
+// Helper function to format date
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    month: 'short', // 'Jan', 'Feb', etc.
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 // Get metadata for the images
 export async function GET(request: NextRequest) {
   try {
@@ -13,9 +23,10 @@ export async function GET(request: NextRequest) {
     const pageSize = 10; // Number of images per page
     const offset = (Number(page) - 1) * pageSize;
 
+    console.log('User ID:', userId);
     // Fetch image records for the current user with pagination
     const {
-      data: images,
+      data: imagesRaw,
       error,
       count,
     } = await supabase
@@ -29,6 +40,12 @@ export async function GET(request: NextRequest) {
       console.error('Supabase error:', error.message);
       return new Response('Database error', { status: 500 });
     }
+
+    // Map and format the dates
+    const images = imagesRaw.map((image) => ({
+      ...image,
+      created_at: formatDate(image.created_at),
+    }));
 
     // Calculate total pages
     const totalPages = count ? Math.ceil(count / pageSize) : 0;
