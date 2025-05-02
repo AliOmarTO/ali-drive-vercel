@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import Sidebar from './Sidebar';
+import ImageCard from './ImageCard';
 
 // Mock image data - replace with your actual image data
 const mockImages = [
@@ -91,12 +92,26 @@ const mockImages = [
   },
 ];
 
+interface ImageMetadata {
+  id: string;
+  userId: string;
+  filename: string;
+  storage_path: string;
+  type: string;
+  thumbnail_path: string;
+  created_at: string;
+  size: number;
+}
+
 export function ImageGallery() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedImages, setSelectedImages] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [imagesMetadata, setImagesMetadata] = useState<ImageMetadata[]>([]); // Store image metadata
+  const [page, setPage] = useState<number>(1); // Pagination state
+  const [totalPages, setTotalPages] = useState(1); // Total number of pages
   const [previewImage, setPreviewImage] = useState<{
-    id: number;
+    id: string;
     name: string;
     url: string;
   } | null>(null);
@@ -105,6 +120,23 @@ export function ImageGallery() {
   const filteredImages = searchTerm
     ? mockImages.filter((image) => image.name.toLowerCase().includes(searchTerm.toLowerCase()))
     : mockImages;
+
+  // retrieve images metadata from server api
+  useEffect(() => {
+    const fetchImagesMetadata = async () => {
+      try {
+        const response = await fetch(`/api/download-metadata?page=${page}`);
+        const data = await response.json();
+        console.log('Fetched images metadata:', data);
+        setImagesMetadata(data.images);
+        setTotalPages(data.totalPages); // Assuming your API returns total pages
+      } catch (error) {
+        console.error('Error fetching images metadata:', error);
+      }
+    };
+
+    fetchImagesMetadata();
+  }, []);
 
   const toggleImageSelection = (id: number) => {
     if (selectedImages.includes(id)) {
@@ -127,11 +159,11 @@ export function ImageGallery() {
     input.click();
   };
 
-  const handleImageClick = (image: { id: number; name: string; thumbnail: string }) => {
+  const handleImageClick = (image: ImageMetadata) => {
     setPreviewImage({
       id: image.id,
-      name: image.name,
-      url: image.thumbnail, // In a real app, this would be the full-size image URL
+      name: image.filename,
+      url: image.thumbnail_path, // In a real app, this would be the full-size image URL
     });
   };
 
@@ -216,70 +248,77 @@ export function ImageGallery() {
           {/* Images Display */}
           {viewMode === 'grid' ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-              {filteredImages.map((image) => (
-                <div
+              {imagesMetadata.map((image) => (
+                <ImageCard
                   key={`image-${image.id}`}
-                  className={`group relative cursor-pointer rounded-lg border transition-all hover:shadow-md ${
-                    selectedImages.includes(image.id) ? 'border-primary bg-primary/5' : ''
-                  }`}
-                  onClick={() => toggleImageSelection(image.id)}
-                  onDoubleClick={() => handleImageClick(image)}
-                >
-                  <div className="aspect-square overflow-hidden rounded-t-lg">
-                    <img
-                      src={image.thumbnail || '/placeholder.svg'}
-                      alt={image.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="p-2">
-                    <p className="text-sm font-medium line-clamp-1">{image.name}</p>
-                    <p className="text-xs text-muted-foreground">{image.size}</p>
-                  </div>
-                  <div className="absolute right-2 top-2 flex gap-1">
-                    {image.shared && (
-                      <div className="rounded-full bg-background/80 p-1">
-                        <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                      </div>
-                    )}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                        <Button
-                          variant="secondary"
-                          size="icon"
-                          className="h-6 w-6 rounded-full bg-background/80 opacity-0 group-hover:opacity-100"
-                        >
-                          <MoreHorizontal className="h-3.5 w-3.5" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleImageClick(image);
-                          }}
-                        >
-                          Preview
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                          Download
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                          Share
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                          Rename
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
+                  imageMetadata={image}
+                  selected={selectedImages.includes(Number(image.id))}
+                  toggleImageSelection={toggleImageSelection}
+                  handleImageClick={handleImageClick}
+                />
+                // <div
+                //   key={`image-${image.id}`}
+                //   className={`group relative cursor-pointer rounded-lg border transition-all hover:shadow-md ${
+                //     selectedImages.includes(image.id) ? 'border-primary bg-primary/5' : ''
+                //   }`}
+                //   onClick={() => toggleImageSelection(image.id)}
+                //   onDoubleClick={() => handleImageClick(image)}
+                // >
+                //   <div className="aspect-square overflow-hidden rounded-t-lg">
+                //     <img
+                //       src={image.thumbnail || '/placeholder.svg'}
+                //       alt={image.name}
+                //       className="h-full w-full object-cover"
+                //     />
+                //   </div>
+                //   <div className="p-2">
+                //     <p className="text-sm font-medium line-clamp-1">{image.name}</p>
+                //     <p className="text-xs text-muted-foreground">{image.size}</p>
+                //   </div>
+                //   <div className="absolute right-2 top-2 flex gap-1">
+                //     {image.shared && (
+                //       <div className="rounded-full bg-background/80 p-1">
+                //         <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                //       </div>
+                //     )}
+                //     <DropdownMenu>
+                //       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                //         <Button
+                //           variant="secondary"
+                //           size="icon"
+                //           className="h-6 w-6 rounded-full bg-background/80 opacity-0 group-hover:opacity-100"
+                //         >
+                //           <MoreHorizontal className="h-3.5 w-3.5" />
+                //         </Button>
+                //       </DropdownMenuTrigger>
+                //       <DropdownMenuContent align="end">
+                //         <DropdownMenuItem
+                //           onClick={(e) => {
+                //             e.stopPropagation();
+                //             handleImageClick(image);
+                //           }}
+                //         >
+                //           Preview
+                //         </DropdownMenuItem>
+                //         <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                //           Download
+                //         </DropdownMenuItem>
+                //         <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                //           Share
+                //         </DropdownMenuItem>
+                //         <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                //           Rename
+                //         </DropdownMenuItem>
+                //         <DropdownMenuItem
+                //           className="text-destructive"
+                //           onClick={(e) => e.stopPropagation()}
+                //         >
+                //           Delete
+                //         </DropdownMenuItem>
+                //       </DropdownMenuContent>
+                //     </DropdownMenu>
+                //   </div>
+                // </div>
               ))}
             </div>
           ) : (
