@@ -70,9 +70,12 @@ export default function ImageCard({
   return (
     <div
       className={`group relative cursor-pointer rounded-lg border transition-all hover:shadow-md ${
-        selected ? 'border-primary bg-primary/5' : ''
+        selected ? 'border-primary bg-primary/5 ' : ''
       }`}
-      onClick={() => toggleImageSelection(imageMetadata.id)}
+      onClick={() => {
+        toggleImageSelection(imageMetadata.id);
+        console.log('Image clicked:', selected);
+      }}
       onDoubleClick={() => handleImageClick(imageMetadata)}
     >
       <div className="aspect-square overflow-hidden rounded-t-lg">
@@ -110,7 +113,6 @@ export default function ImageCard({
               Preview
             </DropdownMenuItem>
             <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Download</DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Share</DropdownMenuItem>
             <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Rename</DropdownMenuItem>
             <DropdownMenuItem className="text-destructive" onClick={(e) => e.stopPropagation()}>
               Delete

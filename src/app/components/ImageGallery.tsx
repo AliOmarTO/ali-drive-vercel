@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,17 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Grid,
-  List,
-  MoreHorizontal,
-  Plus,
-  Search,
-  Share2,
-  Trash2,
-  Upload,
-  Users,
-} from 'lucide-react';
+import { Grid, List, MoreHorizontal, Plus, Search, Trash2, Upload, Users } from 'lucide-react';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import Sidebar from './Sidebar';
 import ImageCard from './ImageCard';
@@ -139,6 +130,7 @@ export function ImageGallery() {
   }, []);
 
   const toggleImageSelection = (id: number) => {
+    console.log('selectedImages', selectedImages);
     if (selectedImages.includes(id)) {
       setSelectedImages(selectedImages.filter((imageId) => imageId !== id));
     } else {
@@ -163,7 +155,7 @@ export function ImageGallery() {
     setPreviewImage({
       id: image.id,
       name: image.filename,
-      url: image.thumbnail_path, // In a real app, this would be the full-size image URL
+      url: image.storage_path, // In a real app, this would be the full-size image URL
     });
   };
 
@@ -220,16 +212,13 @@ export function ImageGallery() {
         {/* Main Content */}
         <main className="flex-1 overflow-auto p-4 md:p-6">
           {/* Selected Images Actions */}
+
           {selectedImages.length > 0 && (
             <div className="mb-4 flex items-center justify-between rounded-lg border bg-background p-2">
               <div className="pl-2">
                 <span className="text-sm font-medium">{selectedImages.length} selected</span>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm">
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share
-                </Button>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -252,7 +241,7 @@ export function ImageGallery() {
                 <ImageCard
                   key={`image-${image.id}`}
                   imageMetadata={image}
-                  selected={selectedImages.includes(Number(image.id))}
+                  selected={selectedImages.includes(image.id)}
                   toggleImageSelection={toggleImageSelection}
                   handleImageClick={handleImageClick}
                 />
