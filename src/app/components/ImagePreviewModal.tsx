@@ -32,6 +32,27 @@ export function ImagePreviewModal({ isOpen, onClose, image }: ImagePreviewModalP
     fetchImage();
   }, [image]);
 
+  const handleDownload = async () => {
+    if (!imageWithUrl) return;
+    try {
+      const response = await fetch(imageWithUrl);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = image?.name || 'download'; // fallback name
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed', error);
+    }
+  };
+
   if (!image) return null;
 
   return (
@@ -40,7 +61,7 @@ export function ImagePreviewModal({ isOpen, onClose, image }: ImagePreviewModalP
         <div className="flex items-center justify-between">
           <DialogTitle>{image.name}</DialogTitle>
           <div className="flex items-center ">
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={handleDownload} disabled={!imageWithUrl}>
               <Download className="h-4 w-4" />
             </Button>
           </div>

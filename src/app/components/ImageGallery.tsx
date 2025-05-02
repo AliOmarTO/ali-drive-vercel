@@ -118,7 +118,7 @@ export function ImageGallery() {
       try {
         const response = await fetch(`/api/download-metadata?page=${page}`);
         const data = await response.json();
-        console.log('Fetched images metadata:', data);
+
         setImagesMetadata(data.images);
         setTotalPages(data.totalPages); // Assuming your API returns total pages
       } catch (error) {
@@ -130,7 +130,6 @@ export function ImageGallery() {
   }, []);
 
   const toggleImageSelection = (id: number) => {
-    console.log('selectedImages', selectedImages);
     if (selectedImages.includes(id)) {
       setSelectedImages(selectedImages.filter((imageId) => imageId !== id));
     } else {
