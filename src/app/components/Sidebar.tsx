@@ -8,9 +8,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Plus, ChevronDown, FolderIcon, Upload, ImageIcon, Star, Trash2 } from 'lucide-react';
+import { Plus, ChevronDown, Upload, ImageIcon, Star, Trash2 } from 'lucide-react';
 
-export default function Sidebar({ handleUpload }: { handleUpload: () => void }) {
+export default function Sidebar({
+  handleUpload,
+  totalSize,
+}: {
+  handleUpload: () => void;
+  totalSize: number;
+}) {
   return (
     <div className="hidden w-64 flex-shrink-0 border-r bg-background p-4 md:block">
       <div className="mb-8 space-y-2">
@@ -57,7 +63,7 @@ export default function Sidebar({ handleUpload }: { handleUpload: () => void }) 
         <div className="text-sm font-medium text-muted-foreground">Storage</div>
         <div className="mt-2">
           <div className="mb-1 flex justify-between text-xs">
-            <span>7.5 GB used</span>
+            <span>{totalSize} MB used</span>
           </div>
           <div className="h-2 rounded-full bg-muted">
             <div className="h-2 w-1/2 rounded-full bg-primary"></div>

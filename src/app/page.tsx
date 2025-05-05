@@ -1,8 +1,7 @@
 'use client';
 
-import FileManagementUI from './components/DEPRECATED/FileManagementUi';
 import { ImageGallery } from './components/ImageGallery';
-import MultiFileUploader from './components/DEPRECATED/multiFileUploader';
+import MultiFileUploader from './components/UploadProgress/multiFileUploader';
 import { useAuth } from '@clerk/nextjs';
 
 export default function Home() {
@@ -12,7 +11,7 @@ export default function Home() {
     //
     // </main>
     <div>
-      <MultiFileUploader userId={userId} />
+      <MultiFileUploader userId={userId ?? ''} />
       <ImageGallery />
     </div>
   );

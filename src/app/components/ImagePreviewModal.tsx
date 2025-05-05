@@ -1,8 +1,9 @@
 'use client';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download, X } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface ImagePreviewModalProps {
   isOpen: boolean;
@@ -71,7 +72,9 @@ export function ImagePreviewModal({ isOpen, onClose, image }: ImagePreviewModalP
           </div>
         </div>
         <div className="mt-4 flex items-center justify-center overflow-hidden rounded-md">
-          <img
+          <Image
+            width={600}
+            height={600}
             src={imageWithUrl || '/placeholder.svg'}
             alt={image.name}
             className="max-h-[70vh] w-auto object-contain"

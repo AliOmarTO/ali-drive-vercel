@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
+import Image from 'next/image';
 
 interface ImageListItemProps {
   image: {
@@ -43,9 +44,11 @@ export function ImageListItem({
     >
       <div className="col-span-6 flex items-center gap-3">
         <div className="h-10 w-10 overflow-hidden rounded flex-shrink-0">
-          <img
-            src={image.thumbnail || '/placeholder.svg'}
-            alt={image.name}
+          <Image
+            width={40}
+            height={40}
+            src={image.thubmnail || '/placeholder.svg'}
+            alt={image.filename}
             className="h-full w-full object-cover"
           />
         </div>

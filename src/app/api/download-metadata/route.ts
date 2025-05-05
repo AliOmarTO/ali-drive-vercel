@@ -3,7 +3,7 @@ import { createSupabaseClient } from '../../../../utils/supabase/client';
 import { auth } from '@clerk/nextjs/server';
 
 // Helper function to format date
-function formatDate(dateString) {
+function formatDate(dateString: string): string {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', {
     month: 'short', // 'Jan', 'Feb', etc.

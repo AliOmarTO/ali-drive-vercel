@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 export interface Image {
   id: string;
@@ -79,8 +80,10 @@ export default function ImageCard({
       onDoubleClick={() => handleImageClick(imageMetadata)}
     >
       <div className="aspect-square overflow-hidden rounded-t-lg">
-        <img
+        <Image
           src={imageWithUrl.presignedUrl || '/placeholder.svg'}
+          width={500}
+          height={300}
           alt={imageMetadata.filename}
           className="h-full w-full object-cover"
         />

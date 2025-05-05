@@ -5,7 +5,7 @@ import {
   getUploadPreSignedUrl,
   uploadMetadata,
 } from '@/server/functions/upload';
-import { useEffect, useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { ProgressBarItem } from './ProgressBarItem';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -97,10 +97,12 @@ interface ImageMetadata {
 
 export function ImageGallery() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [selectedImages, setSelectedImages] = useState<number[]>([]);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [imagesMetadata, setImagesMetadata] = useState<ImageMetadata[]>([]); // Store image metadata
   const [page, setPage] = useState<number>(1); // Pagination state
+  const [hasMore, setHasMore] = useState(true); // Flag to check if more images are available
+  const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1); // Total number of pages
   const [previewImage, setPreviewImage] = useState<{
     id: string;
@@ -108,29 +110,47 @@ export function ImageGallery() {
     url: string;
   } | null>(null);
 
+  // Inside your component
+  const totalSize = useMemo(() => {
+    return imagesMetadata.reduce((sum, image) => sum + image.size, 0);
+  }, [imagesMetadata]);
+
+  const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+
   // Filter images based on search term
-  const filteredImages = searchTerm
-    ? mockImages.filter((image) => image.name.toLowerCase().includes(searchTerm.toLowerCase()))
-    : mockImages;
+  // const filteredImages = searchTerm
+  //   ? mockImages.filter((image) => image.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  //   : mockImages;
+
+  useEffect(() => {
+    loadImages(page);
+  }, [page]);
 
   // retrieve images metadata from server api
-  useEffect(() => {
-    const fetchImagesMetadata = async () => {
-      try {
-        const response = await fetch(`/api/download-metadata?page=${page}`);
-        const data = await response.json();
+  const loadImages = async (page: number) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/download-metadata?page=${page}`);
+      const data = await response.json();
 
-        setImagesMetadata(data.images);
-        setTotalPages(data.totalPages); // Assuming your API returns total pages
-      } catch (error) {
-        console.error('Error fetching images metadata:', error);
-      }
-    };
+      setImagesMetadata((prev) => [...prev, ...data.images]);
+      setTotalPages(data.totalPages); // Assuming your API returns total pages
+      setHasMore(data.totalPages > page); // Check if more pages are available
+      setLoading(false);
+      console.log('Images metadata:', data.hasMore);
+    } catch (error) {
+      console.error('Error fetching images metadata:', error);
+    }
+  };
 
-    fetchImagesMetadata();
-  }, []);
+  const handleLoadMore = () => {
+    if (!loading && hasMore) {
+      setPage((prev) => prev + 1);
+    }
+  };
 
-  const toggleImageSelection = (id: number) => {
+  const toggleImageSelection = (id: string) => {
+    const numericId = Number(id);
     if (selectedImages.includes(id)) {
       setSelectedImages(selectedImages.filter((imageId) => imageId !== id));
     } else {
@@ -166,7 +186,7 @@ export function ImageGallery() {
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
-      <Sidebar handleUpload={handleUpload} />
+      <Sidebar handleUpload={handleUpload} totalSize={Number(totalSizeMB)} />
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -212,104 +232,53 @@ export function ImageGallery() {
         {/* Main Content */}
         <main className="flex-1 overflow-auto p-4 md:p-6">
           {/* Selected Images Actions */}
-
-          {selectedImages.length > 0 && (
-            <div className="mb-4 flex items-center justify-between rounded-lg border bg-background p-2">
-              <div className="pl-2">
-                <span className="text-sm font-medium">{selectedImages.length} selected</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => setSelectedImages([])}>
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          )}
+          <div className="mb-4 flex items-center justify-between rounded-lg  bg-background p-2 min-h-[48px]">
+            {selectedImages.length > 0 ? (
+              <>
+                <div className="pl-2">
+                  <span className="text-sm font-medium">{selectedImages.length} selected</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedImages([])}>
+                    Cancel
+                  </Button>
+                </div>
+              </>
+            ) : null}
+          </div>
 
           {/* Images Display */}
           {viewMode === 'grid' ? (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-              {imagesMetadata.map((image) => (
-                <ImageCard
-                  key={`image-${image.id}`}
-                  imageMetadata={image}
-                  selected={selectedImages.includes(image.id)}
-                  toggleImageSelection={toggleImageSelection}
-                  handleImageClick={handleImageClick}
-                />
-                // <div
-                //   key={`image-${image.id}`}
-                //   className={`group relative cursor-pointer rounded-lg border transition-all hover:shadow-md ${
-                //     selectedImages.includes(image.id) ? 'border-primary bg-primary/5' : ''
-                //   }`}
-                //   onClick={() => toggleImageSelection(image.id)}
-                //   onDoubleClick={() => handleImageClick(image)}
-                // >
-                //   <div className="aspect-square overflow-hidden rounded-t-lg">
-                //     <img
-                //       src={image.thumbnail || '/placeholder.svg'}
-                //       alt={image.name}
-                //       className="h-full w-full object-cover"
-                //     />
-                //   </div>
-                //   <div className="p-2">
-                //     <p className="text-sm font-medium line-clamp-1">{image.name}</p>
-                //     <p className="text-xs text-muted-foreground">{image.size}</p>
-                //   </div>
-                //   <div className="absolute right-2 top-2 flex gap-1">
-                //     {image.shared && (
-                //       <div className="rounded-full bg-background/80 p-1">
-                //         <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                //       </div>
-                //     )}
-                //     <DropdownMenu>
-                //       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                //         <Button
-                //           variant="secondary"
-                //           size="icon"
-                //           className="h-6 w-6 rounded-full bg-background/80 opacity-0 group-hover:opacity-100"
-                //         >
-                //           <MoreHorizontal className="h-3.5 w-3.5" />
-                //         </Button>
-                //       </DropdownMenuTrigger>
-                //       <DropdownMenuContent align="end">
-                //         <DropdownMenuItem
-                //           onClick={(e) => {
-                //             e.stopPropagation();
-                //             handleImageClick(image);
-                //           }}
-                //         >
-                //           Preview
-                //         </DropdownMenuItem>
-                //         <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                //           Download
-                //         </DropdownMenuItem>
-                //         <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                //           Share
-                //         </DropdownMenuItem>
-                //         <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                //           Rename
-                //         </DropdownMenuItem>
-                //         <DropdownMenuItem
-                //           className="text-destructive"
-                //           onClick={(e) => e.stopPropagation()}
-                //         >
-                //           Delete
-                //         </DropdownMenuItem>
-                //       </DropdownMenuContent>
-                //     </DropdownMenu>
-                //   </div>
-                // </div>
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-4">
+                {imagesMetadata.map((image) => (
+                  <ImageCard
+                    key={`image-${image.id}`}
+                    imageMetadata={image}
+                    selected={selectedImages.includes(image.id)}
+                    toggleImageSelection={toggleImageSelection}
+                    handleImageClick={handleImageClick}
+                  />
+                ))}
+              </div>
+              <div className="flex justify-center mt-4">
+                {hasMore ? (
+                  <Button onClick={handleLoadMore} disabled={loading}>
+                    {loading ? 'Loading...' : 'Load More'}
+                  </Button>
+                ) : (
+                  <span className="text-muted-foreground">No more images</span>
+                )}
+              </div>
+            </>
           ) : (
             <div className="rounded-lg border">
               <div className="grid grid-cols-12 gap-4 border-b bg-muted/50 p-3 text-xs font-medium">
@@ -323,7 +292,7 @@ export function ImageGallery() {
                 <ImageListItem
                   key={image.id}
                   image={image}
-                  selected={selectedImages.includes(image.id)}
+                  selected={selectedImages.includes(Number(image.id))}
                   onSelect={toggleImageSelection}
                   onDoubleClick={handleImageClick}
                   onPreview={handleImageClick}

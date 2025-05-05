@@ -1,6 +1,5 @@
 'use client';
 import { cn } from '@/lib/utils';
-import { Progress } from '@/components/ui/progress';
 import { CircleX, X } from 'lucide-react';
 import { useEffect } from 'react';
 
