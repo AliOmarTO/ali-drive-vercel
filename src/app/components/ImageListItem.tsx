@@ -47,7 +47,7 @@ export function ImageListItem({
           <Image
             width={40}
             height={40}
-            src={image.thubmnail || '/placeholder.svg'}
+            src={image.thubmnail || '/image.svg'}
             alt={image.filename}
             className="h-full w-full object-cover"
           />

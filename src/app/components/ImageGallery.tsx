@@ -102,7 +102,7 @@ export function ImageGallery() {
   const [imagesMetadata, setImagesMetadata] = useState<ImageMetadata[]>([]); // Store image metadata
   const [page, setPage] = useState<number>(1); // Pagination state
   const [hasMore, setHasMore] = useState(true); // Flag to check if more images are available
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1); // Total number of pages
   const [previewImage, setPreviewImage] = useState<{
     id: string;
@@ -183,6 +183,10 @@ export function ImageGallery() {
     setPreviewImage(null);
   };
 
+  if (loading) {
+    return;
+  }
+
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
@@ -258,7 +262,7 @@ export function ImageGallery() {
           {/* Images Display */}
           {viewMode === 'grid' ? (
             <>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                 {imagesMetadata.map((image) => (
                   <ImageCard
                     key={`image-${image.id}`}
@@ -292,7 +296,7 @@ export function ImageGallery() {
                 <ImageListItem
                   key={image.id}
                   image={image}
-                  selected={selectedImages.includes(Number(image.id))}
+                  selected={selectedImages.includes(image.id)}
                   onSelect={toggleImageSelection}
                   onDoubleClick={handleImageClick}
                   onPreview={handleImageClick}
