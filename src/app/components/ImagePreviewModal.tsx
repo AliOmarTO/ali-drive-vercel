@@ -33,20 +33,25 @@ export function ImagePreviewModal({ isOpen, onClose, image }: ImagePreviewModalP
 
   const handleDownload = async () => {
     if (!imageWithUrl) return;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     try {
-      const response = await fetch(imageWithUrl);
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
+      if (isMobile) {
+        window.open(imageWithUrl, '_blank');
+      } else {
+        const response = await fetch(imageWithUrl);
+        const blob = await response.blob();
+        const blobUrl = window.URL.createObjectURL(blob);
 
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = image?.name || 'download'; // fallback name
-      document.body.appendChild(link);
-      link.click();
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = image?.name || 'download'; // fallback name
+        document.body.appendChild(link);
+        link.click();
 
-      // Cleanup
-      link.remove();
-      window.URL.revokeObjectURL(blobUrl);
+        // Cleanup
+        link.remove();
+        window.URL.revokeObjectURL(blobUrl);
+      }
     } catch (error) {
       console.error('Download failed', error);
     }
@@ -59,7 +64,7 @@ export function ImagePreviewModal({ isOpen, onClose, image }: ImagePreviewModalP
       <DialogContent className="sm:max-w-3xl">
         <div className="flex items-center justify-between">
           <DialogTitle>{image.name}</DialogTitle>
-          <div className="flex items-center ">
+          <div className="flex items-center  mt-4">
             <Button variant="outline" size="icon" onClick={handleDownload} disabled={!imageWithUrl}>
               <Download className="h-4 w-4" />
             </Button>

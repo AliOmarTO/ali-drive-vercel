@@ -84,6 +84,8 @@ export function ProgressBarItem({
           {/* <Progress value={upload.progress} className={`h-2 rounded `} /> */}
         </div>
       )}
+
+      {upload.error && <p className="mt-1 text-xs text-destructive">{upload.error}</p>}
     </div>
   );
 }
