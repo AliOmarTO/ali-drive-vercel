@@ -51,7 +51,9 @@ export function ImageListItem({
         </div>
         <span className="font-medium">{image.filename}</span>
       </div>
-      <div className="col-span-2 flex items-center text-muted-foreground">{image.size}</div>
+      <div className="col-span-2 flex items-center text-muted-foreground">
+        {(image.size / (1024 * 1024)).toFixed(2)} MB
+      </div>
       <div className="col-span-3 flex items-center text-muted-foreground">{image.created_at}</div>
       <div className="col-span-1 flex items-center justify-end">
         <DropdownMenu>

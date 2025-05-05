@@ -88,7 +88,10 @@ export default function ImageCard({
       <div className="p-2">
         <p className="text-sm font-medium line-clamp-1">{imageMetadata.filename}</p>
         <div className="flex items-center gap-3">
-          <p className="text-xs text-muted-foreground">{imageMetadata.size}</p>
+          <p className="text-xs text-muted-foreground">
+            {' '}
+            {(imageMetadata.size / (1024 * 1024)).toFixed(2)} MB
+          </p>
           <p className="text-xs text-muted-foreground">{imageMetadata.created_at}</p>
         </div>
       </div>
