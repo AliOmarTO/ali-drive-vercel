@@ -14,6 +14,7 @@ import { Grid, List, MoreHorizontal, Plus, Search, Trash2, Upload, Users } from 
 import { ImagePreviewModal } from './ImagePreviewModal';
 import Sidebar from './Sidebar';
 import ImageCard from './ImageCard';
+import { ImageListItem } from './ImageListItem';
 
 // Mock image data - replace with your actual image data
 const mockImages = [
@@ -318,73 +319,21 @@ export function ImageGallery() {
                 <div className="col-span-1"></div>
               </div>
 
-              {filteredImages.map((image) => (
-                <div
-                  key={`image-list-${image.id}`}
-                  className={`grid grid-cols-12 gap-4 border-b p-3 text-sm last:border-0 hover:bg-muted/50 ${
-                    selectedImages.includes(image.id) ? 'bg-primary/5' : ''
-                  }`}
-                  onClick={() => toggleImageSelection(image.id)}
-                  onDoubleClick={() => handleImageClick(image)}
-                >
-                  <div className="col-span-6 flex items-center gap-3">
-                    <div className="h-10 w-10 overflow-hidden rounded flex-shrink-0">
-                      <img
-                        src={image.thumbnail || '/placeholder.svg'}
-                        alt={image.name}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <span className="font-medium">{image.name}</span>
-                    {image.shared && <Users className="h-4 w-4 text-muted-foreground" />}
-                  </div>
-                  <div className="col-span-2 flex items-center text-muted-foreground">
-                    {image.size}
-                  </div>
-                  <div className="col-span-3 flex items-center text-muted-foreground">
-                    {image.modified}
-                  </div>
-                  <div className="col-span-1 flex items-center justify-end">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleImageClick(image);
-                          }}
-                        >
-                          Preview
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                          Download
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                          Share
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                          Rename
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
+              {imagesMetadata.map((image) => (
+                <ImageListItem
+                  key={image.id}
+                  image={image}
+                  selected={selectedImages.includes(image.id)}
+                  onSelect={toggleImageSelection}
+                  onDoubleClick={handleImageClick}
+                  onPreview={handleImageClick}
+                />
               ))}
             </div>
           )}
 
           {/* Empty state */}
-          {filteredImages.length === 0 && (
+          {imagesMetadata.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="mb-4 rounded-full bg-muted/50 p-4">
                 <Upload className="h-6 w-6 text-muted-foreground" />

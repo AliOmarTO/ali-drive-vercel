@@ -21,7 +21,6 @@ export function ImagePreviewModal({ isOpen, onClose, image }: ImagePreviewModalP
   useEffect(() => {
     const fetchImage = async () => {
       setImageWithUrl(null); // Reset the image URL when the image changes
-      console.log('pew', image);
       if (image) {
         const response = await fetch(`/api/download?path=${image.url}`);
         const urlData = await response.json();

@@ -58,7 +58,6 @@ export default function Sidebar({ handleUpload }: { handleUpload: () => void }) 
         <div className="mt-2">
           <div className="mb-1 flex justify-between text-xs">
             <span>7.5 GB used</span>
-            <span>50%</span>
           </div>
           <div className="h-2 rounded-full bg-muted">
             <div className="h-2 w-1/2 rounded-full bg-primary"></div>
