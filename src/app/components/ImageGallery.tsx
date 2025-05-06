@@ -1,88 +1,83 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Grid, List, MoreHorizontal, Plus, Search, Trash2, Upload, Users } from 'lucide-react';
+
+import { Grid, List, Plus, Search, Trash2, Upload } from 'lucide-react';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import Sidebar from './Sidebar';
 import ImageCard from './ImageCard';
 import { ImageListItem } from './ImageListItem';
 
 // Mock image data - replace with your actual image data
-const mockImages = [
-  {
-    id: 1,
-    name: 'Beach Sunset.jpg',
-    size: '3.2 MB',
-    modified: 'Apr 28, 2025',
-    shared: true,
-    thumbnail: '/placeholder.svg?height=200&width=200',
-  },
-  {
-    id: 2,
-    name: 'Mountain View.png',
-    size: '5.1 MB',
-    modified: 'Apr 25, 2025',
-    shared: false,
-    thumbnail: '/placeholder.svg?height=200&width=200',
-  },
-  {
-    id: 3,
-    name: 'Family Portrait.jpg',
-    size: '4.8 MB',
-    modified: 'Apr 22, 2025',
-    shared: true,
-    thumbnail: '/placeholder.svg?height=200&width=200',
-  },
-  {
-    id: 4,
-    name: 'Profile Picture.jpg',
-    size: '2.2 MB',
-    modified: 'Apr 20, 2025',
-    shared: false,
-    thumbnail: '/placeholder.svg?height=200&width=200',
-  },
-  {
-    id: 5,
-    name: 'Company Logo.png',
-    size: '1.5 MB',
-    modified: 'Apr 15, 2025',
-    shared: true,
-    thumbnail: '/placeholder.svg?height=200&width=200',
-  },
-  {
-    id: 6,
-    name: 'Beach Waves.jpg',
-    size: '3.7 MB',
-    modified: 'Apr 12, 2025',
-    shared: false,
-    thumbnail: '/placeholder.svg?height=200&width=200',
-  },
-  {
-    id: 7,
-    name: 'Sunset View.jpg',
-    size: '4.1 MB',
-    modified: 'Apr 10, 2025',
-    shared: true,
-    thumbnail: '/placeholder.svg?height=200&width=200',
-  },
-  {
-    id: 8,
-    name: 'Team Photo.jpg',
-    size: '5.3 MB',
-    modified: 'Apr 8, 2025',
-    shared: true,
-    thumbnail: '/placeholder.svg?height=200&width=200',
-  },
-];
+// const mockImages = [
+//   {
+//     id: 1,
+//     name: 'Beach Sunset.jpg',
+//     size: '3.2 MB',
+//     modified: 'Apr 28, 2025',
+//     shared: true,
+//     thumbnail: '/placeholder.svg?height=200&width=200',
+//   },
+//   {
+//     id: 2,
+//     name: 'Mountain View.png',
+//     size: '5.1 MB',
+//     modified: 'Apr 25, 2025',
+//     shared: false,
+//     thumbnail: '/placeholder.svg?height=200&width=200',
+//   },
+//   {
+//     id: 3,
+//     name: 'Family Portrait.jpg',
+//     size: '4.8 MB',
+//     modified: 'Apr 22, 2025',
+//     shared: true,
+//     thumbnail: '/placeholder.svg?height=200&width=200',
+//   },
+//   {
+//     id: 4,
+//     name: 'Profile Picture.jpg',
+//     size: '2.2 MB',
+//     modified: 'Apr 20, 2025',
+//     shared: false,
+//     thumbnail: '/placeholder.svg?height=200&width=200',
+//   },
+//   {
+//     id: 5,
+//     name: 'Company Logo.png',
+//     size: '1.5 MB',
+//     modified: 'Apr 15, 2025',
+//     shared: true,
+//     thumbnail: '/placeholder.svg?height=200&width=200',
+//   },
+//   {
+//     id: 6,
+//     name: 'Beach Waves.jpg',
+//     size: '3.7 MB',
+//     modified: 'Apr 12, 2025',
+//     shared: false,
+//     thumbnail: '/placeholder.svg?height=200&width=200',
+//   },
+//   {
+//     id: 7,
+//     name: 'Sunset View.jpg',
+//     size: '4.1 MB',
+//     modified: 'Apr 10, 2025',
+//     shared: true,
+//     thumbnail: '/placeholder.svg?height=200&width=200',
+//   },
+//   {
+//     id: 8,
+//     name: 'Team Photo.jpg',
+//     size: '5.3 MB',
+//     modified: 'Apr 8, 2025',
+//     shared: true,
+//     thumbnail: '/placeholder.svg?height=200&width=200',
+//   },
+// ];
 
 interface ImageMetadata {
   id: string;
@@ -108,6 +103,7 @@ export function ImageGallery() {
     id: string;
     name: string;
     url: string;
+    storage_path: string;
   } | null>(null);
 
   // Inside your component
@@ -146,11 +142,11 @@ export function ImageGallery() {
   const handleLoadMore = () => {
     if (!loading && hasMore) {
       setPage((prev) => prev + 1);
+      console.log(totalPages);
     }
   };
 
   const toggleImageSelection = (id: string) => {
-    const numericId = Number(id);
     if (selectedImages.includes(id)) {
       setSelectedImages(selectedImages.filter((imageId) => imageId !== id));
     } else {
@@ -176,6 +172,7 @@ export function ImageGallery() {
       id: image.id,
       name: image.filename,
       url: image.storage_path, // In a real app, this would be the full-size image URL
+      storage_path: image.storage_path,
     });
   };
 

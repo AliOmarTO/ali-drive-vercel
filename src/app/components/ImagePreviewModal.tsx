@@ -9,7 +9,7 @@ interface ImagePreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   image: {
-    id: number;
+    id: string;
     name: string;
     url: string;
     storage_path: string;
