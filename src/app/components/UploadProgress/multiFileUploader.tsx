@@ -5,7 +5,10 @@ import {
   getUploadPreSignedUrl,
   uploadMetadata,
 } from '@/server/functions/upload';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { ProgressBarItem } from './ProgressBarItem';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 type FileUploadStatus = {
   file: File;
@@ -17,6 +20,12 @@ type FileUploadStatus = {
 export default function MultiFileUploader({ userId }: { userId: string }) {
   const [uploads, setUploads] = useState<FileUploadStatus[]>([]);
   const [showOverlay, setShowOverlay] = useState(true);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Function to remove an upload from the list
+  function removeUpload(fileName: string) {
+    setUploads((prev) => prev.filter((upload) => upload.file.name !== fileName));
+  }
 
   // Function to upload a file to R2 with progress tracking
   const handleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,12 +102,27 @@ export default function MultiFileUploader({ userId }: { userId: string }) {
     );
   };
 
+  const handleUpload = () => {
+    inputRef.current?.click();
+  };
+
   return (
     <div>
-      <input type="file" multiple onChange={handleFiles} />
+      <input
+        type="file"
+        multiple
+        accept="image/*"
+        ref={inputRef}
+        onChange={handleFiles}
+        style={{ display: 'none' }} // Hide the input
+      />
+      <Button className="w-auto justify-start gap-2 pl-3" onClick={handleUpload}>
+        <Plus className="h-4 w-4" />
+        Upload Images
+      </Button>
 
       {uploads.length > 0 && showOverlay && (
-        <div className="fixed bottom-4 right-4 w-80 bg-white shadow-lg rounded-lg p-4 space-y-2 z-50">
+        <div className="fixed  bottom-4 right-4 w-80 bg-white shadow-lg rounded-lg p-4 space-y-2 z-50">
           <div className="flex justify-between items-center">
             <h4 className="font-semibold text-sm">Uploading Files</h4>
             <button
@@ -109,19 +133,11 @@ export default function MultiFileUploader({ userId }: { userId: string }) {
             </button>
           </div>
 
-          {uploads.map((upload, i) => (
-            <div key={i}>
-              <p className="text-xs truncate">{upload.file.name}</p>
-              <div className="w-full bg-gray-200 h-2 rounded">
-                <div
-                  className={`h-2 rounded ${
-                    upload.done ? 'bg-green-500' : upload.error ? 'bg-red-500' : 'bg-blue-500'
-                  }`}
-                  style={{ width: `${upload.progress}%` }}
-                />
-              </div>
-            </div>
-          ))}
+          <div className=" max-h-96 overflow-y-auto">
+            {uploads.map((upload, i) => (
+              <ProgressBarItem key={i} upload={upload} onRemove={removeUpload} />
+            ))}
+          </div>
         </div>
       )}
     </div>

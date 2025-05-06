@@ -1,4 +1,4 @@
-export const generateThumbnail = (file: File, maxWidth: number = 50): Promise<File> => {
+export const generateThumbnail = (file: File, maxWidth: number = 200): Promise<File> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const reader = new FileReader();
