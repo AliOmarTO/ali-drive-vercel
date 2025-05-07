@@ -23,7 +23,7 @@ export interface Image {
 interface ImageCardProps {
   imageMetadata: Image;
   selected: boolean;
-  toggleImageSelection: (id: string) => void;
+  toggleImageSelection: (image: Image) => void;
   handleImageClick: (image: Image) => void;
 }
 
@@ -74,7 +74,7 @@ export default function ImageCard({
         selected ? 'border-primary bg-primary/5 ' : ''
       }`}
       onClick={() => {
-        toggleImageSelection(imageMetadata.id);
+        toggleImageSelection(imageMetadata);
         console.log('Image clicked:', selected);
       }}
       onDoubleClick={() => handleImageClick(imageMetadata)}

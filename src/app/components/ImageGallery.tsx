@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Grid, List, Plus, Search, Trash2, Upload } from 'lucide-react';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import Sidebar from './Sidebar';
-import ImageCard from './ImageCard';
+import ImageCard, { Image } from './ImageCard';
 import { ImageListItem } from './ImageListItem';
 
 // Mock image data - replace with your actual image data
@@ -92,7 +92,7 @@ interface ImageMetadata {
 
 export function ImageGallery() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [selectedImages, setSelectedImages] = useState<ImageMetadata[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [imagesMetadata, setImagesMetadata] = useState<ImageMetadata[]>([]); // Store image metadata
   const [page, setPage] = useState<number>(1); // Pagination state
@@ -146,11 +146,12 @@ export function ImageGallery() {
     }
   };
 
-  const toggleImageSelection = (id: string) => {
-    if (selectedImages.includes(id)) {
-      setSelectedImages(selectedImages.filter((imageId) => imageId !== id));
+  const toggleImageSelection = (imageSelected: ImageMetadata) => {
+    console.log(selectedImages);
+    if (selectedImages.includes(imageSelected)) {
+      setSelectedImages(selectedImages.filter((imageId) => imageId.id !== imageSelected.id));
     } else {
-      setSelectedImages([...selectedImages, id]);
+      setSelectedImages([...selectedImages, imageSelected]);
     }
   };
 
@@ -174,6 +175,20 @@ export function ImageGallery() {
       url: image.storage_path, // In a real app, this would be the full-size image URL
       storage_path: image.storage_path,
     });
+  };
+
+  const handleDelete = async () => {
+    const imagesToDelete = selectedImages.filter((img) => img.id !== undefined);
+    const keysToDelete = imagesToDelete.flatMap((img) => [img.thumbnail_path, img.storage_path]);
+    try {
+      await fetch('/api/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bucketName: 'my-bucket', keys: keysToDelete }),
+      });
+    } catch (error) {
+      console.error('Error deleting images:', error);
+    }
   };
 
   const closeImagePreview = () => {
@@ -244,6 +259,7 @@ export function ImageGallery() {
                     variant="ghost"
                     size="sm"
                     className="text-destructive hover:text-destructive"
+                    onClick={handleDelete}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
@@ -264,7 +280,7 @@ export function ImageGallery() {
                   <ImageCard
                     key={`image-${image.id}`}
                     imageMetadata={image}
-                    selected={selectedImages.includes(image.id)}
+                    selected={selectedImages.includes(image)}
                     toggleImageSelection={toggleImageSelection}
                     handleImageClick={handleImageClick}
                   />
@@ -293,7 +309,7 @@ export function ImageGallery() {
                 <ImageListItem
                   key={image.id}
                   image={image}
-                  selected={selectedImages.includes(image.id)}
+                  selected={selectedImages.includes(image)}
                   onSelect={toggleImageSelection}
                   onDoubleClick={handleImageClick}
                   onPreview={handleImageClick}

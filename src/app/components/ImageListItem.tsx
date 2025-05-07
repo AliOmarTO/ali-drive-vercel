@@ -21,7 +21,7 @@ interface ImageListItemProps {
     size: number;
   };
   selected: boolean;
-  onSelect: (id: string) => void;
+  onSelect: (image: any) => void;
   onDoubleClick: (image: any) => void;
   onPreview: (image: any) => void;
 }
