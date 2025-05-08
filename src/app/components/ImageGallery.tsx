@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Grid, List, Plus, Search, Trash2, Upload } from 'lucide-react';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import Sidebar from './Sidebar';
-import ImageCard, { Image } from './ImageCard';
+import ImageCard from './ImageCard';
 import { ImageListItem } from './ImageListItem';
 
 // Mock image data - replace with your actual image data
@@ -179,12 +179,12 @@ export function ImageGallery() {
 
   const handleDelete = async () => {
     const imagesToDelete = selectedImages.filter((img) => img.id !== undefined);
-    const keysToDelete = imagesToDelete.flatMap((img) => [img.thumbnail_path, img.storage_path]);
+    //const keysToDelete = imagesToDelete.flatMap((img) => [img.thumbnail_path, img.storage_path]);
     try {
       await fetch('/api/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bucketName: 'my-bucket', keys: keysToDelete }),
+        body: JSON.stringify({ bucketName: 'my-bucket', images: imagesToDelete }),
       });
     } catch (error) {
       console.error('Error deleting images:', error);
