@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Plus, ChevronDown, Upload, ImageIcon, Star, Trash2 } from 'lucide-react';
+import MultiFileUploader from './UploadProgress/multiFileUploader';
 
 export default function Sidebar({
   handleUpload,
@@ -20,14 +21,10 @@ export default function Sidebar({
   return (
     <div className="hidden w-64 flex-shrink-0 border-r bg-background p-4 md:block">
       <div className="mb-8 space-y-2">
-        <Button className="w-full justify-start gap-2 pl-3" onClick={handleUpload}>
-          <Plus className="h-4 w-4" />
-          Upload Images
-        </Button>
-
+        <MultiFileUploader />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full justify-start gap-2 pl-3">
+            <Button disabled variant="outline" className="w-full justify-start gap-2 pl-3">
               <Plus className="h-4 w-4" />
               Create New
               <ChevronDown className="ml-auto h-4 w-4" />
@@ -48,12 +45,12 @@ export default function Sidebar({
           My Images
         </Button>
 
-        <Button variant="ghost" className="w-full justify-start gap-2 pl-3">
+        <Button variant="ghost" disabled className="w-full justify-start gap-2 pl-3">
           <Star className="h-4 w-4" />
           Favorites
         </Button>
 
-        <Button variant="ghost" className="w-full justify-start gap-2 pl-3">
+        <Button variant="ghost" disabled className="w-full justify-start gap-2 pl-3">
           <Trash2 className="h-4 w-4" />
           Trash
         </Button>

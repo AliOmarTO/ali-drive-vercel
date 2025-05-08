@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 export interface Image {
   id: string;
@@ -23,8 +24,9 @@ export interface Image {
 interface ImageCardProps {
   imageMetadata: Image;
   selected: boolean;
-  toggleImageSelection: (id: string) => void;
+  toggleImageSelection: (image: Image) => void;
   handleImageClick: (image: Image) => void;
+  onDeleteComplete?: (image: Image) => void;
 }
 
 export default function ImageCard({
@@ -32,6 +34,7 @@ export default function ImageCard({
   selected,
   toggleImageSelection,
   handleImageClick,
+  onDeleteComplete,
 }: ImageCardProps) {
   const [imageWithUrl, setImageWithUrl] = useState<Image & { presignedUrl: string }>(); // Stores pre-signed URLs for images
 
@@ -60,6 +63,25 @@ export default function ImageCard({
     fetchImage();
   }, [imageMetadata]);
 
+  const handleDelete = async () => {
+    const imageToDelete = imageMetadata;
+    //const keysToDelete = imagesToDelete.flatMap((img) => [img.thumbnail_path, img.storage_path]);
+    try {
+      await fetch('/api/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bucketName: 'my-bucket', images: [imageToDelete] }),
+      });
+    } catch (error) {
+      console.error('Error deleting images:', error);
+      toast.error('Error deleting image. Please try again.');
+    } finally {
+      // Tell the parent which image was deleted
+      onDeleteComplete?.(imageToDelete);
+      toast.success('Image deleted successfully!');
+    }
+  };
+
   if (!imageWithUrl) {
     return (
       <div className="flex h-32 w-32 animate-pulse items-center justify-center rounded-lg border bg-background">
@@ -74,7 +96,7 @@ export default function ImageCard({
         selected ? 'border-primary bg-primary/5 ' : ''
       }`}
       onClick={() => {
-        toggleImageSelection(imageMetadata.id);
+        toggleImageSelection(imageMetadata);
         console.log('Image clicked:', selected);
       }}
       onDoubleClick={() => handleImageClick(imageMetadata)}
@@ -88,6 +110,24 @@ export default function ImageCard({
           className="h-full w-full object-cover"
         />
       </div>
+      {selected && (
+        <div className="absolute left-2 top-2 rounded-full bg-primary p-1 text-primary-foreground">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="lucide lucide-check"
+          >
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+      )}
       <div className="p-2">
         <p className="text-sm font-medium line-clamp-1">{imageMetadata.filename}</p>
         <div className="flex items-center gap-3">
@@ -104,9 +144,9 @@ export default function ImageCard({
             <Button
               variant="secondary"
               size="icon"
-              className="h-6 w-6 rounded-full bg-background/80 opacity-0 group-hover:opacity-100"
+              className="h-8 w-8 rounded-full bg-background/80 opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
             >
-              <MoreHorizontal className="h-3.5 w-3.5" />
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -119,8 +159,16 @@ export default function ImageCard({
               Preview
             </DropdownMenuItem>
             <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Download</DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Rename</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem disabled onClick={(e) => e.stopPropagation()}>
+              Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete();
+              }}
+            >
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

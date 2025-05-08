@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 interface ImageListItemProps {
   image: {
@@ -21,9 +22,10 @@ interface ImageListItemProps {
     size: number;
   };
   selected: boolean;
-  onSelect: (id: string) => void;
+  onSelect: (image: any) => void;
   onDoubleClick: (image: any) => void;
   onPreview: (image: any) => void;
+  onDeleteComplete?: (deletedImage: any) => void;
 }
 
 export function ImageListItem({
@@ -32,14 +34,36 @@ export function ImageListItem({
   onSelect,
   onDoubleClick,
   onPreview,
+  onDeleteComplete,
 }: ImageListItemProps) {
+  const handleDelete = async () => {
+    const imageToDelete = image;
+    //const keysToDelete = imagesToDelete.flatMap((img) => [img.thumbnail_path, img.storage_path]);
+    try {
+      await fetch('/api/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bucketName: 'my-bucket', images: [imageToDelete] }),
+      });
+    } catch (error) {
+      console.error('Error deleting images:', error);
+      toast.error('Error deleting images');
+    } finally {
+      // ✅ Tell the parent which image was deleted
+      onDeleteComplete?.(imageToDelete);
+
+      toast.success('Image deleted successfully');
+      // Optionally, you can trigger a refresh or update the UI here
+    }
+  };
+
   return (
     <div
       key={`image-list-${image.id}`}
       className={`grid grid-cols-12 gap-4 border-b p-3 text-sm last:border-0 hover:bg-muted/50 ${
         selected ? 'bg-primary/5' : ''
       }`}
-      onClick={() => onSelect(image.id)}
+      onClick={() => onSelect(image)}
       onDoubleClick={() => onDoubleClick(image)}
     >
       <div className="col-span-6 flex items-center gap-3">
@@ -74,9 +98,19 @@ export function ImageListItem({
             >
               Preview
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Download</DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Rename</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem disabled onClick={(e) => e.stopPropagation()}>
+              Download
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled onClick={(e) => e.stopPropagation()}>
+              Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete();
+              }}
+            >
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

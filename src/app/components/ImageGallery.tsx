@@ -5,11 +5,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-import { Grid, List, Plus, Search, Trash2, Upload } from 'lucide-react';
+import { Grid, List, Search, Trash2, Upload } from 'lucide-react';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import Sidebar from './Sidebar';
-import ImageCard from './ImageCard';
+import ImageCard, { Image } from './ImageCard';
 import { ImageListItem } from './ImageListItem';
+import MultiFileUploader from './UploadProgress/multiFileUploader';
+import { toast } from 'sonner';
 
 // Mock image data - replace with your actual image data
 // const mockImages = [
@@ -92,7 +94,7 @@ interface ImageMetadata {
 
 export function ImageGallery() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [selectedImages, setSelectedImages] = useState<ImageMetadata[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [imagesMetadata, setImagesMetadata] = useState<ImageMetadata[]>([]); // Store image metadata
   const [page, setPage] = useState<number>(1); // Pagination state
@@ -146,11 +148,12 @@ export function ImageGallery() {
     }
   };
 
-  const toggleImageSelection = (id: string) => {
-    if (selectedImages.includes(id)) {
-      setSelectedImages(selectedImages.filter((imageId) => imageId !== id));
+  const toggleImageSelection = (imageSelected: ImageMetadata) => {
+    console.log(selectedImages);
+    if (selectedImages.includes(imageSelected)) {
+      setSelectedImages(selectedImages.filter((imageId) => imageId.id !== imageSelected.id));
     } else {
-      setSelectedImages([...selectedImages, id]);
+      setSelectedImages([...selectedImages, imageSelected]);
     }
   };
 
@@ -176,6 +179,34 @@ export function ImageGallery() {
     });
   };
 
+  // handles single image deletion in child components card and list item
+  const handleImageDeleted = (deletedImage: Image) => {
+    // Clear selected images after deletion
+    setSelectedImages([]);
+    setImagesMetadata((prev) => prev.filter((img) => img.id !== deletedImage.id));
+  };
+
+  // handles multiple image deletion from the action bar
+  const handleDelete = async () => {
+    const imagesToDelete = selectedImages.filter((img) => img.id !== undefined);
+    //const keysToDelete = imagesToDelete.flatMap((img) => [img.thumbnail_path, img.storage_path]);
+    try {
+      await fetch('/api/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bucketName: 'my-bucket', images: imagesToDelete }),
+      });
+    } catch (error) {
+      console.error('Error deleting images:', error);
+      toast.error('Error deleting images. Please try again.');
+    } finally {
+      // refresh the image list after deletion
+      setSelectedImages([]);
+      setImagesMetadata((prev) => prev.filter((img) => !imagesToDelete.includes(img)));
+      toast.success('Images deleted successfully!');
+    }
+  };
+
   const closeImagePreview = () => {
     setPreviewImage(null);
   };
@@ -192,7 +223,7 @@ export function ImageGallery() {
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex h-16 items-center justify-between border-b px-4 md:px-6">
+        <header className="flex h-auto flex-col border-b px-4 py-3 sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:py-0 md:px-6">
           <div className="flex items-center gap-2 md:w-1/3">
             <div className="relative w-full">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -206,67 +237,80 @@ export function ImageGallery() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setViewMode('grid')}
-              className={viewMode === 'grid' ? 'bg-accent' : ''}
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setViewMode('list')}
-              className={viewMode === 'list' ? 'bg-accent' : ''}
-            >
-              <List className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" onClick={handleUpload} className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2 sm:justify-start">
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode('grid')}
+                className={viewMode === 'grid' ? 'bg-accent' : ''}
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode('list')}
+                className={viewMode === 'list' ? 'bg-accent' : ''}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+            {/* <Button variant="outline" onClick={handleUpload} className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
               <span>Upload</span>
-            </Button>
+            </Button> */}
+            <MultiFileUploader />
           </div>
         </header>
 
         {/* Main Content */}
         <main className="flex-1 overflow-auto p-4 md:p-6">
           {/* Selected Images Actions */}
-          <div className="mb-4 flex items-center justify-between rounded-lg  bg-background p-2 min-h-[48px]">
-            {selectedImages.length > 0 ? (
-              <>
-                <div className="pl-2">
-                  <span className="text-sm font-medium">{selectedImages.length} selected</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setSelectedImages([])}>
-                    Cancel
-                  </Button>
-                </div>
-              </>
-            ) : null}
-          </div>
+          {selectedImages.length > 0 && (
+            <div className="mb-4 flex flex-col sm:flex-row items-center justify-between rounded-lg border bg-background p-2 sticky top-0 z-30">
+              {selectedImages.length > 0 ? (
+                <>
+                  <div className="pl-2 mb-2 sm:mb-0">
+                    <span className="text-sm font-medium">{selectedImages.length} selected</span>
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive flex-1 sm:flex-initial"
+                      onClick={handleDelete}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4 sm:mr-2" />
+                      Delete
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex-1 sm:flex-initial"
+                      onClick={() => setSelectedImages([])}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              ) : null}
+            </div>
+          )}
 
           {/* Images Display */}
+          {/* Grid */}
           {viewMode === 'grid' ? (
             <>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+              <div className="grid grid-cols-2 gap-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                 {imagesMetadata.map((image) => (
                   <ImageCard
                     key={`image-${image.id}`}
                     imageMetadata={image}
-                    selected={selectedImages.includes(image.id)}
+                    selected={selectedImages.includes(image)}
                     toggleImageSelection={toggleImageSelection}
                     handleImageClick={handleImageClick}
+                    onDeleteComplete={handleImageDeleted}
                   />
                 ))}
               </div>
@@ -281,6 +325,7 @@ export function ImageGallery() {
               </div>
             </>
           ) : (
+            /* List */
             <div className="rounded-lg border">
               <div className="grid grid-cols-12 gap-4 border-b bg-muted/50 p-3 text-xs font-medium">
                 <div className="col-span-6">Name</div>
@@ -293,10 +338,11 @@ export function ImageGallery() {
                 <ImageListItem
                   key={image.id}
                   image={image}
-                  selected={selectedImages.includes(image.id)}
+                  selected={selectedImages.includes(image)}
                   onSelect={toggleImageSelection}
                   onDoubleClick={handleImageClick}
                   onPreview={handleImageClick}
+                  onDeleteComplete={handleImageDeleted}
                 />
               ))}
             </div>
@@ -312,10 +358,11 @@ export function ImageGallery() {
               <p className="mb-4 text-center text-sm text-muted-foreground">
                 {searchTerm ? 'Try a different search term' : 'Upload images to get started'}
               </p>
-              <Button onClick={handleUpload}>
+              <MultiFileUploader />
+              {/* <Button onClick={handleUpload}>
                 <Plus className="mr-2 h-4 w-4" />
                 Upload Images
-              </Button>
+              </Button> */}
             </div>
           )}
         </main>
