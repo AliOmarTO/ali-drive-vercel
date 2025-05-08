@@ -8,6 +8,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 export interface Image {
   id: string;
@@ -25,6 +26,7 @@ interface ImageCardProps {
   selected: boolean;
   toggleImageSelection: (image: Image) => void;
   handleImageClick: (image: Image) => void;
+  onDeleteComplete?: (image: Image) => void;
 }
 
 export default function ImageCard({
@@ -32,6 +34,7 @@ export default function ImageCard({
   selected,
   toggleImageSelection,
   handleImageClick,
+  onDeleteComplete,
 }: ImageCardProps) {
   const [imageWithUrl, setImageWithUrl] = useState<Image & { presignedUrl: string }>(); // Stores pre-signed URLs for images
 
@@ -71,6 +74,11 @@ export default function ImageCard({
       });
     } catch (error) {
       console.error('Error deleting images:', error);
+      toast.error('Error deleting image. Please try again.');
+    } finally {
+      // Tell the parent which image was deleted
+      onDeleteComplete?.(imageToDelete);
+      toast.success('Image deleted successfully!');
     }
   };
 
@@ -150,9 +158,7 @@ export default function ImageCard({
             >
               Preview
             </DropdownMenuItem>
-            <DropdownMenuItem disabled onClick={(e) => e.stopPropagation()}>
-              Download
-            </DropdownMenuItem>
+            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Download</DropdownMenuItem>
             <DropdownMenuItem disabled onClick={(e) => e.stopPropagation()}>
               Rename
             </DropdownMenuItem>

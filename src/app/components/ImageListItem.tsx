@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
 import Image from 'next/image';
+import { toast } from 'sonner';
 
 interface ImageListItemProps {
   image: {
@@ -24,6 +25,7 @@ interface ImageListItemProps {
   onSelect: (image: any) => void;
   onDoubleClick: (image: any) => void;
   onPreview: (image: any) => void;
+  onDeleteComplete?: (deletedImage: any) => void;
 }
 
 export function ImageListItem({
@@ -32,6 +34,7 @@ export function ImageListItem({
   onSelect,
   onDoubleClick,
   onPreview,
+  onDeleteComplete,
 }: ImageListItemProps) {
   const handleDelete = async () => {
     const imageToDelete = image;
@@ -44,6 +47,13 @@ export function ImageListItem({
       });
     } catch (error) {
       console.error('Error deleting images:', error);
+      toast.error('Error deleting images');
+    } finally {
+      // ✅ Tell the parent which image was deleted
+      onDeleteComplete?.(imageToDelete);
+
+      toast.success('Image deleted successfully');
+      // Optionally, you can trigger a refresh or update the UI here
     }
   };
 
@@ -53,7 +63,7 @@ export function ImageListItem({
       className={`grid grid-cols-12 gap-4 border-b p-3 text-sm last:border-0 hover:bg-muted/50 ${
         selected ? 'bg-primary/5' : ''
       }`}
-      onClick={() => onSelect(image.id)}
+      onClick={() => onSelect(image)}
       onDoubleClick={() => onDoubleClick(image)}
     >
       <div className="col-span-6 flex items-center gap-3">

@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Grid, List, Plus, Search, Trash2, Upload } from 'lucide-react';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import Sidebar from './Sidebar';
-import ImageCard from './ImageCard';
+import ImageCard, { Image } from './ImageCard';
 import { ImageListItem } from './ImageListItem';
 import MultiFileUploader from './UploadProgress/multiFileUploader';
+import { toast } from 'sonner';
 
 // Mock image data - replace with your actual image data
 // const mockImages = [
@@ -178,6 +179,14 @@ export function ImageGallery() {
     });
   };
 
+  // handles single image deletion in child components card and list item
+  const handleImageDeleted = (deletedImage: Image) => {
+    // Clear selected images after deletion
+    setSelectedImages([]);
+    setImagesMetadata((prev) => prev.filter((img) => img.id !== deletedImage.id));
+  };
+
+  // handles multiple image deletion from the action bar
   const handleDelete = async () => {
     const imagesToDelete = selectedImages.filter((img) => img.id !== undefined);
     //const keysToDelete = imagesToDelete.flatMap((img) => [img.thumbnail_path, img.storage_path]);
@@ -189,6 +198,12 @@ export function ImageGallery() {
       });
     } catch (error) {
       console.error('Error deleting images:', error);
+      toast.error('Error deleting images. Please try again.');
+    } finally {
+      // refresh the image list after deletion
+      setSelectedImages([]);
+      setImagesMetadata((prev) => prev.filter((img) => !imagesToDelete.includes(img)));
+      toast.success('Images deleted successfully!');
     }
   };
 
@@ -287,7 +302,7 @@ export function ImageGallery() {
           {/* Grid */}
           {viewMode === 'grid' ? (
             <>
-              <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+              <div className="grid grid-cols-2 gap-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                 {imagesMetadata.map((image) => (
                   <ImageCard
                     key={`image-${image.id}`}
@@ -295,6 +310,7 @@ export function ImageGallery() {
                     selected={selectedImages.includes(image)}
                     toggleImageSelection={toggleImageSelection}
                     handleImageClick={handleImageClick}
+                    onDeleteComplete={handleImageDeleted}
                   />
                 ))}
               </div>
@@ -326,6 +342,7 @@ export function ImageGallery() {
                   onSelect={toggleImageSelection}
                   onDoubleClick={handleImageClick}
                   onPreview={handleImageClick}
+                  onDeleteComplete={handleImageDeleted}
                 />
               ))}
             </div>
