@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-import { Grid, List, Plus, Search, Trash2, Upload } from 'lucide-react';
+import { Grid, List, Search, Trash2, Upload } from 'lucide-react';
 import { ImagePreviewModal } from './ImagePreviewModal';
 import Sidebar from './Sidebar';
 import ImageCard, { Image } from './ImageCard';
