@@ -10,6 +10,7 @@ import { ImagePreviewModal } from './ImagePreviewModal';
 import Sidebar from './Sidebar';
 import ImageCard from './ImageCard';
 import { ImageListItem } from './ImageListItem';
+import MultiFileUploader from './UploadProgress/multiFileUploader';
 
 // Mock image data - replace with your actual image data
 // const mockImages = [
@@ -238,10 +239,11 @@ export function ImageGallery() {
             >
               <List className="h-4 w-4" />
             </Button>
-            <Button variant="outline" onClick={handleUpload} className="flex items-center gap-2">
+            {/* <Button variant="outline" onClick={handleUpload} className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
               <span>Upload</span>
-            </Button>
+            </Button> */}
+            <MultiFileUploader />
           </div>
         </header>
 

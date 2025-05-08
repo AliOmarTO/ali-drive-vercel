@@ -9,6 +9,7 @@ import { useState, useRef } from 'react';
 import { ProgressBarItem } from './ProgressBarItem';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { useAuth } from '@clerk/nextjs';
 
 type FileUploadStatus = {
   file: File;
@@ -17,10 +18,11 @@ type FileUploadStatus = {
   error?: string;
 };
 
-export default function MultiFileUploader({ userId }: { userId: string }) {
+export default function MultiFileUploader() {
   const [uploads, setUploads] = useState<FileUploadStatus[]>([]);
   const [showOverlay, setShowOverlay] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { userId } = useAuth();
 
   // Function to remove an upload from the list
   function removeUpload(fileName: string) {
@@ -116,7 +118,7 @@ export default function MultiFileUploader({ userId }: { userId: string }) {
         onChange={handleFiles}
         style={{ display: 'none' }} // Hide the input
       />
-      <Button className="w-auto justify-start gap-2 pl-3" onClick={handleUpload}>
+      <Button className="w-full justify-start  gap-2 pl-3" onClick={handleUpload}>
         <Plus className="h-4 w-4" />
         Upload Images
       </Button>
