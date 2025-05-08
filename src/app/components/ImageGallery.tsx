@@ -284,6 +284,7 @@ export function ImageGallery() {
           )}
 
           {/* Images Display */}
+          {/* Grid */}
           {viewMode === 'grid' ? (
             <>
               <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
@@ -308,6 +309,7 @@ export function ImageGallery() {
               </div>
             </>
           ) : (
+            /* List */
             <div className="rounded-lg border">
               <div className="grid grid-cols-12 gap-4 border-b bg-muted/50 p-3 text-xs font-medium">
                 <div className="col-span-6">Name</div>
@@ -339,10 +341,11 @@ export function ImageGallery() {
               <p className="mb-4 text-center text-sm text-muted-foreground">
                 {searchTerm ? 'Try a different search term' : 'Upload images to get started'}
               </p>
-              <Button onClick={handleUpload}>
+              <MultiFileUploader />
+              {/* <Button onClick={handleUpload}>
                 <Plus className="mr-2 h-4 w-4" />
                 Upload Images
-              </Button>
+              </Button> */}
             </div>
           )}
         </main>

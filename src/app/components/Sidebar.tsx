@@ -45,12 +45,12 @@ export default function Sidebar({
           My Images
         </Button>
 
-        <Button variant="ghost" className="w-full justify-start gap-2 pl-3">
+        <Button variant="ghost" disabled className="w-full justify-start gap-2 pl-3">
           <Star className="h-4 w-4" />
           Favorites
         </Button>
 
-        <Button variant="ghost" className="w-full justify-start gap-2 pl-3">
+        <Button variant="ghost" disabled className="w-full justify-start gap-2 pl-3">
           <Trash2 className="h-4 w-4" />
           Trash
         </Button>

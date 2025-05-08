@@ -33,6 +33,20 @@ export function ImageListItem({
   onDoubleClick,
   onPreview,
 }: ImageListItemProps) {
+  const handleDelete = async () => {
+    const imageToDelete = image;
+    //const keysToDelete = imagesToDelete.flatMap((img) => [img.thumbnail_path, img.storage_path]);
+    try {
+      await fetch('/api/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bucketName: 'my-bucket', images: [imageToDelete] }),
+      });
+    } catch (error) {
+      console.error('Error deleting images:', error);
+    }
+  };
+
   return (
     <div
       key={`image-list-${image.id}`}
@@ -74,9 +88,19 @@ export function ImageListItem({
             >
               Preview
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Download</DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Rename</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem disabled onClick={(e) => e.stopPropagation()}>
+              Download
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled onClick={(e) => e.stopPropagation()}>
+              Rename
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete();
+              }}
+            >
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
