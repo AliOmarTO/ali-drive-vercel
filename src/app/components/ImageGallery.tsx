@@ -208,7 +208,7 @@ export function ImageGallery() {
       {/* Main Content */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex h-16 items-center justify-between border-b px-4 md:px-6">
+        <header className="flex h-auto flex-col border-b px-4 py-3 sm:h-16 sm:flex-row sm:items-center sm:justify-between sm:py-0 md:px-6">
           <div className="flex items-center gap-2 md:w-1/3">
             <div className="relative w-full">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -222,23 +222,25 @@ export function ImageGallery() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setViewMode('grid')}
-              className={viewMode === 'grid' ? 'bg-accent' : ''}
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setViewMode('list')}
-              className={viewMode === 'list' ? 'bg-accent' : ''}
-            >
-              <List className="h-4 w-4" />
-            </Button>
+          <div className="flex items-center justify-between gap-2 sm:justify-start">
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode('grid')}
+                className={viewMode === 'grid' ? 'bg-accent' : ''}
+              >
+                <Grid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewMode('list')}
+                className={viewMode === 'list' ? 'bg-accent' : ''}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
             {/* <Button variant="outline" onClick={handleUpload} className="flex items-center gap-2">
               <Upload className="h-4 w-4" />
               <span>Upload</span>
@@ -250,23 +252,28 @@ export function ImageGallery() {
         {/* Main Content */}
         <main className="flex-1 overflow-auto p-4 md:p-6">
           {/* Selected Images Actions */}
-          <div className="mb-4 flex items-center justify-between rounded-lg  bg-background p-2 min-h-[48px]">
+          <div className="mb-4 flex flex-col sm:flex-row items-center justify-between rounded-lg border bg-background p-2">
             {selectedImages.length > 0 ? (
               <>
-                <div className="pl-2">
+                <div className="pl-2 mb-2 sm:mb-0">
                   <span className="text-sm font-medium">{selectedImages.length} selected</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-destructive hover:text-destructive"
+                    className="text-destructive hover:text-destructive flex-1 sm:flex-initial"
                     onClick={handleDelete}
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
+                    <Trash2 className="mr-2 h-4 w-4 sm:mr-2" />
                     Delete
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setSelectedImages([])}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex-1 sm:flex-initial"
+                    onClick={() => setSelectedImages([])}
+                  >
                     Cancel
                   </Button>
                 </div>
@@ -277,7 +284,7 @@ export function ImageGallery() {
           {/* Images Display */}
           {viewMode === 'grid' ? (
             <>
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+              <div className="grid grid-cols-1 gap-3 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                 {imagesMetadata.map((image) => (
                   <ImageCard
                     key={`image-${image.id}`}

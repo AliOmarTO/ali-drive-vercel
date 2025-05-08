@@ -119,7 +119,7 @@ export default function MultiFileUploader() {
         style={{ display: 'none' }} // Hide the input
       />
       <Button className="w-full justify-start  gap-2 pl-3" onClick={handleUpload}>
-        <Plus className="h-4 w-4" />
+        <Plus className="h-4 w-4 sm:inline" />
         Upload Images
       </Button>
 

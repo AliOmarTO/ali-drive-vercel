@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       if (error.name === 'NoSuchBucket') {
         return NextResponse.json(
           {
-            error: `The bucket "${error.$metadata?.httpHeaders['x-amz-bucket-name']}" doesn't exist.`,
+            error: `The bucket doesn't exist.`,
           },
           { status: 404 }
         );

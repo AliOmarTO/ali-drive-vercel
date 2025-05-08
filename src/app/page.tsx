@@ -1,5 +1,4 @@
 import { ImageGallery } from './components/ImageGallery';
-import MultiFileUploader from './components/UploadProgress/multiFileUploader';
 
 export default function Home() {
   return (
