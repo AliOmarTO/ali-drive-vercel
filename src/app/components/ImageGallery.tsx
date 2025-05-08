@@ -252,34 +252,36 @@ export function ImageGallery() {
         {/* Main Content */}
         <main className="flex-1 overflow-auto p-4 md:p-6">
           {/* Selected Images Actions */}
-          <div className="mb-4 flex flex-col sm:flex-row items-center justify-between rounded-lg border bg-background p-2">
-            {selectedImages.length > 0 ? (
-              <>
-                <div className="pl-2 mb-2 sm:mb-0">
-                  <span className="text-sm font-medium">{selectedImages.length} selected</span>
-                </div>
-                <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive flex-1 sm:flex-initial"
-                    onClick={handleDelete}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4 sm:mr-2" />
-                    Delete
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex-1 sm:flex-initial"
-                    onClick={() => setSelectedImages([])}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </>
-            ) : null}
-          </div>
+          {selectedImages.length > 0 && (
+            <div className="mb-4 flex flex-col sm:flex-row items-center justify-between rounded-lg border bg-background p-2 sticky top-0 z-30">
+              {selectedImages.length > 0 ? (
+                <>
+                  <div className="pl-2 mb-2 sm:mb-0">
+                    <span className="text-sm font-medium">{selectedImages.length} selected</span>
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive flex-1 sm:flex-initial"
+                      onClick={handleDelete}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4 sm:mr-2" />
+                      Delete
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex-1 sm:flex-initial"
+                      onClick={() => setSelectedImages([])}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              ) : null}
+            </div>
+          )}
 
           {/* Images Display */}
           {viewMode === 'grid' ? (
