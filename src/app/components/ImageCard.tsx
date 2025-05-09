@@ -158,7 +158,9 @@ export default function ImageCard({
             >
               Preview
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => e.stopPropagation()}>Download</DropdownMenuItem>
+            <DropdownMenuItem disabled onClick={(e) => e.stopPropagation()}>
+              Download
+            </DropdownMenuItem>
             <DropdownMenuItem disabled onClick={(e) => e.stopPropagation()}>
               Rename
             </DropdownMenuItem>
